@@ -9,14 +9,21 @@
   // ---------- 分类（预置清单，用户可自定义增删改） ----------
   const DEFAULT_CATS = {
     out: [
-      { name: '餐饮', icon: '🍜' }, { name: '奶茶', icon: '🧋' }, { name: '交通', icon: '🚌' },
-      { name: '购物', icon: '🛍️' }, { name: '美妆', icon: '💄' }, { name: '服饰', icon: '👗' },
-      { name: '房租', icon: '🏠' }, { name: '水电费', icon: '💡' }, { name: '宠物', icon: '🐱' },
-      { name: '医疗', icon: '💊' }, { name: '娱乐', icon: '🎮' }, { name: '其他', icon: '📦' }
+      { name: '餐饮', icon: '🍜' }, { name: '奶茶', icon: '🧋' }, { name: '零食', icon: '🍪' },
+      { name: '水果', icon: '🍉' }, { name: '交通', icon: '🚌' }, { name: '购物', icon: '🛍️' },
+      { name: '美妆', icon: '💄' }, { name: '服饰', icon: '👗' }, { name: '鞋包', icon: '👟' },
+      { name: '房租', icon: '🏠' }, { name: '水电费', icon: '💡' }, { name: '物业', icon: '🏢' },
+      { name: '宠物', icon: '🐱' }, { name: '宝宝', icon: '🍼' }, { name: '医疗', icon: '💊' },
+      { name: '健身', icon: '🏃‍♀️' }, { name: '娱乐', icon: '🎮' }, { name: '电影', icon: '🎬' },
+      { name: '旅行', icon: '✈️' }, { name: '数码', icon: '📱' }, { name: '书籍', icon: '📖' },
+      { name: '学习', icon: '✏️' }, { name: '保险', icon: '🛡️' }, { name: '人情', icon: '🎁' },
+      { name: '通讯', icon: '☎️' }, { name: '其他', icon: '📦' }
     ],
     in: [
-      { name: '工资', icon: '💰' }, { name: '兼职', icon: '💼' }, { name: '理财', icon: '📈' },
-      { name: '红包', icon: '🧧' }, { name: '退款', icon: '↩️' }, { name: '其他', icon: '✨' }
+      { name: '工资', icon: '💰' }, { name: '兼职', icon: '💼' }, { name: '奖金', icon: '🏆' },
+      { name: '理财', icon: '📈' }, { name: '投资', icon: '💹' }, { name: '利息', icon: '🪙' },
+      { name: '红包', icon: '🧧' }, { name: '退款', icon: '↩️' }, { name: '报销', icon: '📄' },
+      { name: '其他', icon: '✨' }
     ]
   };
   // 运行期分类（从设置读取，缺失则用预置）
@@ -24,12 +31,12 @@
 
   // ---------- 主题（马卡龙 / 奶油色系，可爱风） ----------
   const THEMES = [
-    { key: 'cream', name: '奶油蓝', color: '#8ab4ff', bg: '#eef4ff', icon: '🫧' },
-    { key: 'mint',  name: '薄荷青', color: '#5ed6c0', bg: '#e6faf5', icon: '🍃' },
-    { key: 'peach', name: '蜜桃粉', color: '#ff9eb5', bg: '#fff0f4', icon: '🍑' },
-    { key: 'sakura',name: '樱花粉', color: '#f6a5c0', bg: '#fdeef5', icon: '🌸' },
-    { key: 'sun',   name: '暖阳黄', color: '#ffc857', bg: '#fff7e6', icon: '🌞' },
-    { key: 'grape', name: '葡萄紫', color: '#b39ddb', bg: '#f3edfb', icon: '🍇' }
+    { key: 'cream', name: '奶油蓝', color: '#8ab4ff', bg: '#eef4ff', top: 'linear-gradient(135deg,#a8c6ff 0%,#7aa8ff 100%)', icon: '🫧' },
+    { key: 'mint',  name: '薄荷青', color: '#5ed6c0', bg: '#e6faf5', top: 'linear-gradient(135deg,#7ce8d4 0%,#4ec9b3 100%)', icon: '🍃' },
+    { key: 'peach', name: '蜜桃粉', color: '#ff9eb5', bg: '#fff0f4', top: 'linear-gradient(135deg,#ffb8c9 0%,#ff8fa3 100%)', icon: '🍑' },
+    { key: 'sakura',name: '樱花粉', color: '#f6a5c0', bg: '#fdeef5', top: 'linear-gradient(135deg,#ffbcd4 0%,#f28fad 100%)', icon: '🌸' },
+    { key: 'sun',   name: '暖阳黄', color: '#ffc857', bg: '#fff7e6', top: 'linear-gradient(135deg,#ffe08a 0%,#ffbf4d 100%)', icon: '🌞' },
+    { key: 'grape', name: '葡萄紫', color: '#b39ddb', bg: '#f3edfb', top: 'linear-gradient(135deg,#cbb6e8 0%,#9f89d3 100%)', icon: '🍇' }
   ];
 
   // ---------- IndexedDB ----------
@@ -325,9 +332,12 @@
     root.style.setProperty('--blue', t.color);
     root.style.setProperty('--blue-d', t.color);
     root.style.setProperty('--bg', t.bg);
-    root.style.setProperty('--text', key === 'dark' ? '#e8ebf0' : '#1c2533');
-    root.style.setProperty('--sub', key === 'dark' ? '#8b93a3' : '#6b7280');
+    root.style.setProperty('--topbar-bg', t.top);
+    root.style.setProperty('--text', '#3a3550');
+    root.style.setProperty('--sub', '#9b94b0');
     $('#themeColor').setAttribute('content', t.color);
+    const topbar = $('.topbar');
+    if (topbar) topbar.style.background = t.top;
     settings.theme = key; saveSettings(); renderThemes();
   }
   function renderThemes() {
@@ -359,7 +369,15 @@
   }
 
   // ---------- 分类管理（自定义增删改） ----------
-  const EMOJI_POOL = ['🍜','🧋','🚌','🛍️','💄','👗','🏠','💡','🐱','💊','🎮','📦','💰','💼','📈','🧧','↩️','✨','🍰','🎀','🌸','☕','📚','✈️','🍔','🍱','🐶','🐰','💅','🛒','🏥','🎁','📱','💻','🧴','👟','🍉','🥤','🎬','📖'];
+  const EMOJI_POOL = [
+    '🍜','🧋','🍪','🍰','🍩','🍦','🍫','🍬','🍭','🍉','🍓','🍎','🍌','🍇','🍊','🥑',
+    '🚌','🚕','🚗','🚲','🛵','✈️','🚄','🚢','🛍️','🛒','🎁','🎀','🧸','💄','👗','👟',
+    '👜','💍','🕶️','🧢','🏠','💡','🔌','💧','🏢','🧹','🐱','🐶','🐰','🐹','🦊','🐼',
+    '🍼','👶','🧒','🤱','🎒','🍼','💊','🏥','🩺','🏃‍♀️','🧘‍♀️','🎾','🎮','🎬','🎤','🎨',
+    '📱','💻','⌚','📷','🎧','📖','📚','✏️','📝','🎓','🧮','📈','💹','💰','💼','🧧',
+    '🏆','🥇','🪙','💳','🧾','📄','↩️','✨','⭐','🌸','🌷','🌻','🍃','🌈','☀️','🌙',
+    '🍕','🍔','🍟','🌭','🍿','🥗','🍱','🍣','🥟','🍛','🍝','🥘','🍲','🥗','🍤','🍙'
+  ];
   let editType = 'out';
   function openCatMgr() {
     editType = curType;
@@ -372,12 +390,12 @@
     const list = CATS[editType];
     $('#catMgrList').innerHTML = list.map((c, i) => `
       <div class="cat-mgr-item">
+        <span class="ops">
+          <button data-act="del" data-i="${i}" title="删除">🗑</button>
+          <button data-act="edit" data-i="${i}" title="编辑">✏️</button>
+        </span>
         <span class="e">${c.icon}</span>
         <span class="n">${esc(c.name)}</span>
-        <span class="ops">
-          <button data-act="edit" data-i="${i}">✏️</button>
-          <button data-act="del" data-i="${i}">🗑</button>
-        </span>
       </div>`).join('');
     $('#catMgrList').querySelectorAll('button').forEach(b => {
       b.addEventListener('click', () => {
