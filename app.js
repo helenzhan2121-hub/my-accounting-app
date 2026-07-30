@@ -31,12 +31,12 @@
 
   // ---------- 主题（马卡龙 / 奶油色系，可爱风） ----------
   const THEMES = [
-    { key: 'cream', name: '奶油蓝', color: '#8ab4ff', bg: '#eef4ff', top: 'linear-gradient(135deg,#a8c6ff 0%,#7aa8ff 100%)', icon: '🫧' },
-    { key: 'mint',  name: '薄荷青', color: '#5ed6c0', bg: '#e6faf5', top: 'linear-gradient(135deg,#7ce8d4 0%,#4ec9b3 100%)', icon: '🍃' },
-    { key: 'peach', name: '蜜桃粉', color: '#ff9eb5', bg: '#fff0f4', top: 'linear-gradient(135deg,#ffb8c9 0%,#ff8fa3 100%)', icon: '🍑' },
-    { key: 'sakura',name: '樱花粉', color: '#f6a5c0', bg: '#fdeef5', top: 'linear-gradient(135deg,#ffbcd4 0%,#f28fad 100%)', icon: '🌸' },
-    { key: 'sun',   name: '暖阳黄', color: '#ffc857', bg: '#fff7e6', top: 'linear-gradient(135deg,#ffe08a 0%,#ffbf4d 100%)', icon: '🌞' },
-    { key: 'grape', name: '葡萄紫', color: '#b39ddb', bg: '#f3edfb', top: 'linear-gradient(135deg,#cbb6e8 0%,#9f89d3 100%)', icon: '🍇' }
+    { key: 'indigo', name: '靛蓝',   color: '#4F46E5', bg: '#F5F6FA', top: 'linear-gradient(135deg,#6366F1 0%,#4F46E5 100%)', icon: '🟣' },
+    { key: 'slate',  name: '石墨',   color: '#475569', bg: '#F1F5F9', top: 'linear-gradient(135deg,#64748B 0%,#334155 100%)', icon: '⚫' },
+    { key: 'teal',   name: '青绿',   color: '#0D9488', bg: '#ECFDF9', top: 'linear-gradient(135deg,#14B8A6 0%,#0D9488 100%)', icon: '🟢' },
+    { key: 'amber',  name: '琥珀',   color: '#D97706', bg: '#FFFBEB', top: 'linear-gradient(135deg,#F59E0B 0%,#D97706 100%)', icon: '🟠' },
+    { key: 'rose',   name: '玫红',   color: '#E11D48', bg: '#FFF1F3', top: 'linear-gradient(135deg,#F43F5E 0%,#E11D48 100%)', icon: '🌹' },
+    { key: 'violet', name: '紫罗兰', color: '#7C3AED', bg: '#F5F3FF', top: 'linear-gradient(135deg,#8B5CF6 0%,#7C3AED 100%)', icon: '🔮' }
   ];
 
   // ---------- IndexedDB ----------
@@ -95,11 +95,11 @@
   let curType = 'out';
   let curCat = null;
   let currentMonth = monthOf(todayStr());
-  let settings = { theme: 'cream', avatar: '', wallpaper: '', wallpaperMode: 'face', cats: null };
+  let settings = { theme: 'indigo', avatar: '', wallpaper: '', wallpaperMode: 'face', cats: null };
 
   function loadSettings() {
     try { settings = JSON.parse(localStorage.getItem('dz_settings') || '{}'); } catch (e) {}
-    if (!settings.theme) settings.theme = 'cream';
+    if (!settings.theme) settings.theme = 'indigo';
     if (!settings.wallpaperMode) settings.wallpaperMode = 'face';
     if (!settings.cats || !settings.cats.out || !settings.cats.in) {
       settings.cats = JSON.parse(JSON.stringify(DEFAULT_CATS));
@@ -260,7 +260,7 @@
     const map = {};
     outRecs.forEach(r => { map[r.cat] = (map[r.cat] || 0) + +r.amt; });
     const total = Object.values(map).reduce((a, b) => a + b, 0);
-    const colors = ['#1F67FE', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+    const colors = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6'];
     const cx = w / 2 - 40, cy = h / 2, r = Math.min(cx, cy) - 12;
     let start = -Math.PI / 2;
     const legend = [];
@@ -334,8 +334,8 @@
     root.style.setProperty('--blue-d', t.color);
     root.style.setProperty('--bg', t.bg);
     root.style.setProperty('--topbar-bg', t.top);
-    root.style.setProperty('--text', '#3a3550');
-    root.style.setProperty('--sub', '#9b94b0');
+    root.style.setProperty('--text', '#1f2937');
+    root.style.setProperty('--sub', '#6b7280');
     $('#themeColor').setAttribute('content', t.color);
     const topbar = $('.topbar');
     if (topbar) topbar.style.background = t.top;
