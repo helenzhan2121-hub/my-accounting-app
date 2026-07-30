@@ -230,8 +230,8 @@
       const base = top + chartH;
       if (vOut > 0) { ctx.fillStyle = '#ef4444'; ctx.fillRect(x, base - hOut, barW / 2, hOut); }
       if (vIn > 0) { ctx.fillStyle = '#16a34a'; ctx.fillRect(x + barW / 2, base - hIn, barW / 2, hIn); }
-      // label every 5 days
-      if ((i + 1) % 5 === 0 || days <= 10) {
+      // X 轴刻度：每 7 天标一次（1/8/15/22/29），数据仍是每日粒度
+      if ((i === 0) || (i + 1) % 7 === 0 || i === days - 1) {
         ctx.fillStyle = '#6b7280'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
         ctx.fillText(d, x + barW / 2, h - 8);
       }
@@ -390,37 +390,63 @@
     const list = CATS[editType];
     $('#catMgrList').innerHTML = list.map((c, i) => `
       <div class="cat-mgr-item">
-        <span class="ops">
-          <button data-act="del" data-i="${i}" title="删除">🗑</button>
-          <button data-act="edit" data-i="${i}" title="编辑">✏️</button>
-        </span>
         <span class="e">${c.icon}</span>
         <span class="n">${esc(c.name)}</span>
+        <span class="ops">
+          <button data-act="edit" data-i="${i}" title="编辑">✏️</button>
+          <button data-act="del" data-i="${i}" title="删除">🗑</button>
+        </span>
       </div>`).join('');
     $('#catMgrList').querySelectorAll('button').forEach(b => {
       b.addEventListener('click', () => {
         const i = +b.dataset.i;
         if (b.dataset.act === 'del') {
-          const c = CATS[editType][i];
-          if (c.name === '其他') { alert('「其他」是兜底分类，不能删哦～'); return; }
-          if (confirm(`删除分类「${c.name}」？已有该分类的记账会保留并显示原名。`)) {
-            CATS[editType].splice(i, 1); saveSettings(); renderCatMgr();
-          }
+          openCatEdit(i);   // 删除也走弹窗，删除键在左侧
         } else {
-          editCat(i);
+          openCatEdit(i);
         }
       });
     });
   }
-  function editCat(i) {
+  // 编辑 / 删除弹窗（删除在左，保存/确认在右）
+  function openCatEdit(i) {
     const c = CATS[editType][i];
-    const name = prompt('分类名称：', c.name);
+    const isDefault = c.name === '其他';
+    $('#catEditName').value = c.name;
+    $('#catEditEmoji').textContent = c.icon;
+    $('#catEditEmoji').dataset.cur = c.icon;
+    const delBtn = $('#catEditDel');
+    if (isDefault) {
+      delBtn.style.display = 'none';
+    } else {
+      delBtn.style.display = '';
+      delBtn.onclick = () => {
+        if (confirm(`删除分类「${c.name}」？已有该分类的记账会保留并显示原名。`)) {
+          CATS[editType].splice(i, 1); saveSettings(); renderCatMgr(); closeCatEdit();
+        }
+      };
+    }
+    $('#catEditSave').onclick = () => {
+      const name = $('#catEditName').value.trim();
+      if (!name) { alert('名称不能为空'); return; }
+      CATS[editType][i] = { name, icon: $('#catEditEmoji').dataset.cur || c.icon };
+      saveSettings(); renderCatMgr(); closeCatEdit();
+    };
+    $('#catEditEmoji').onclick = () => {
+      pickEmoji((emoji) => { $('#catEditEmoji').textContent = emoji; $('#catEditEmoji').dataset.cur = emoji; }, $('#catEditEmoji').dataset.cur);
+    };
+    $('#catEditMask').classList.add('show');
+  }
+  function closeCatEdit() { $('#catEditMask').classList.remove('show'); }
+  function addCat() {
+    const name = prompt('新分类名称：', '');
     if (name === null) return;
     if (!name.trim()) { alert('名称不能为空'); return; }
+    if (CATS[editType].some(c => c.name === name.trim())) { alert('已存在同名分类'); return; }
     pickEmoji((emoji) => {
-      CATS[editType][i] = { name: name.trim(), icon: emoji || c.icon };
+      CATS[editType].push({ name: name.trim(), icon: emoji || '⭐' });
       saveSettings(); renderCatMgr();
-    }, c.icon);
+    });
   }
   function addCat() {
     const name = prompt('新分类名称：', '');
@@ -530,6 +556,7 @@
     $('#addCatBtn').addEventListener('click', addCat);
     document.querySelectorAll('#catMgrTabs button').forEach(b => b.addEventListener('click', () => { editType = b.dataset.v; renderCatMgr(); }));
     $('#emojiPickerMask').addEventListener('click', (e) => { if (e.target.id === 'emojiPickerMask') $('#emojiPickerMask').classList.remove('show'); });
+    $('#catEditMask').addEventListener('click', (e) => { if (e.target.id === 'catEditMask') closeCatEdit(); });
     window.addEventListener('resize', () => { if ($('#viewStats').classList.contains('active')) renderStats(); });
   }
 

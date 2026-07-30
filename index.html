@@ -75,12 +75,12 @@
     .home-card .io-box .v{font-size:18px; font-weight:700; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
     .home-card .io-box .v.in{color:var(--in);}
     .home-card .io-box .v.out{color:var(--out);}
-    .sec-title{display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700; margin:18px 4px 10px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.2);}
-    .sec-title .more{font-size:12px; font-weight:500; opacity:.9;}
+    .sec-title{display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700; margin:18px 4px 10px; color:var(--text);}
+    .sec-title .more{font-size:12px; font-weight:500; color:var(--sub);}
 
     /* 明细 */
     .day-group{margin-bottom:14px;}
-    .day-head{display:flex; justify-content:space-between; align-items:center; padding:10px 4px; font-size:13px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.2);}
+    .day-head{display:flex; justify-content:space-between; align-items:center; padding:10px 4px; font-size:13px; color:var(--text); font-weight:600;}
     .day-head .tag{background:rgba(0,0,0,.12); padding:2px 8px; border-radius:10px; font-size:11px; margin-left:8px;}
     .rec-item{
       background:var(--card); border-radius:20px; padding:14px 15px; margin-bottom:10px;
@@ -95,8 +95,8 @@
     .rec-item .amt.in{color:var(--in);} .rec-item .amt.out{color:var(--out);}
 
     /* 统计 */
-    .stat-head{display:flex; align-items:center; justify-content:center; gap:14px; margin:4px 0 16px; color:#fff; font-size:17px; font-weight:700; text-shadow:0 1px 3px rgba(0,0,0,.2);}
-    .stat-head button{background:rgba(255,255,255,.2); border:none; color:#fff; width:28px; height:28px; border-radius:50%; font-size:14px;}
+    .stat-head{display:flex; align-items:center; justify-content:center; gap:14px; margin:4px 0 16px; color:var(--text); font-size:17px; font-weight:700;}
+    .stat-head button{background:var(--card); border:1px solid var(--line); color:var(--text); width:28px; height:28px; border-radius:50%; font-size:14px; box-shadow:0 2px 6px rgba(0,0,0,.06);}
     .stat-cards{display:flex; gap:10px; margin-bottom:16px;}
     .stat-cards .sc{flex:1; background:var(--card); border-radius:18px; padding:14px 10px; text-align:center; backdrop-filter:blur(10px); box-shadow:0 4px 16px rgba(0,0,0,.06);}
     .stat-cards .sc .k{font-size:12px; color:var(--sub);}
@@ -197,7 +197,7 @@
     .save-btn{width:100%;background:var(--text);color:#fff;border:none;border-radius:16px;padding:16px;font-size:17px;font-weight:700;margin-top:6px;}
 
     /* 空态 */
-    .empty{text-align:center;color:#fff; padding:70px 20px; font-size:14px; opacity:.85; text-shadow:0 1px 3px rgba(0,0,0,.2);}
+    .empty{text-align:center;color:var(--sub); padding:70px 20px; font-size:14px;}
 
     /* 导出/备份按钮 */
     .action-btn{width:100%; padding:14px; border-radius:14px; border:1px solid var(--line); background:rgba(255,255,255,.5); font-size:15px; font-weight:600; margin-bottom:10px; color:var(--text);}
@@ -248,7 +248,7 @@
         <div class="sc out"><div class="k">支出</div><div class="v" id="statOut">¥0</div></div>
         <div class="sc"><div class="k">结余</div><div class="v" id="statBal">¥0</div></div>
       </div>
-      <div class="chart-card"><h4>收支趋势（每日）</h4><canvas id="barChart"></canvas></div>
+      <div class="chart-card"><h4>收支趋势 · 按日</h4><canvas id="barChart"></canvas></div>
       <div class="chart-card"><h4>支出分类占比</h4><canvas id="pieChart"></canvas></div>
     </div>
 
@@ -317,6 +317,25 @@
       </div>
       <div class="cat-mgr-list" id="catMgrList"></div>
       <button class="cat-mgr-add" id="addCatBtn">＋ 新增分类</button>
+    </div>
+  </div>
+
+  <!-- 分类编辑弹窗 -->
+  <div class="emoji-mask" id="catEditMask">
+    <div class="emoji-picker" style="max-width:360px;">
+      <div style="font-size:15px;font-weight:700;margin-bottom:14px;color:var(--text);">编辑分类</div>
+      <div class="field-line">
+        <label>图标</label>
+        <div id="catEditEmoji" style="font-size:34px;text-align:center;background:#faf8ff;border-radius:14px;padding:10px;cursor:pointer;">⭐</div>
+      </div>
+      <div class="field-line">
+        <label>名称</label>
+        <input type="text" id="catEditName" placeholder="分类名称" maxlength="8">
+      </div>
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button class="action-btn danger" id="catEditDel" style="flex:1;margin:0;">🗑 删除</button>
+        <button class="save-btn" id="catEditSave" style="flex:2;margin:0;">保存</button>
+      </div>
     </div>
   </div>
 
