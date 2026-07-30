@@ -64,13 +64,15 @@
     .amount-number{ font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
 
     /* ---------- 壁纸三模式（保留） ---------- */
-    body.has-wallpaper{ --card:rgba(255,255,255,.82); }
+    /* 有壁纸时首页进入「偶像可见模式」：卡片高透明，让背景人物透出来 */
+    body.has-wallpaper{ --card:rgba(255,255,255,.38); }
     body.wp-mode-face{ background-size:cover !important; background-position:center top !important; background-repeat:no-repeat !important; }
     body.wp-mode-full{ background-size:contain !important; background-position:center top !important; background-repeat:no-repeat !important; }
     body.wp-mode-cover{ background-size:cover !important; background-position:center !important; background-repeat:no-repeat !important; }
     body.has-wallpaper::before{
       content:''; position:fixed; inset:0; z-index:-1; pointer-events:none;
-      background:radial-gradient(circle at center top, rgba(255,255,255,.12) 0%, rgba(17,24,39,.16) 72%);
+      /* 减轻暗角，避免遮挡偶像 */
+      background:radial-gradient(circle at center top, rgba(255,255,255,.06) 0%, rgba(17,24,39,.10) 72%);
     }
 
     .app{max-width:480px;margin:0 auto;min-height:100%;position:relative;padding-bottom:86px;}
@@ -100,19 +102,38 @@
     .view{display:none; padding:0 16px 16px; padding-top:10px;}
     .view.active{display:block;}
 
-    /* 有壁纸时，顶栏与卡片统一半透明+毛玻璃，让背景人物露出来 */
+    /* 有壁纸时，顶栏与卡片统一高透明+强毛玻璃（偶像可见模式） */
     body.has-wallpaper .topbar,
     body.has-wallpaper .home-card,
     body.has-wallpaper .rec-item,
     body.has-wallpaper .stat-cards .sc,
     body.has-wallpaper .chart-card,
     body.has-wallpaper .mine-card,
-    body.has-wallpaper .cat-mgr-item{ backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+    body.has-wallpaper .cat-mgr-item{ backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); }
     body.has-wallpaper .topbar{
-      background:linear-gradient(135deg, rgba(99,102,241,.78) 0%, rgba(79,70,229,.78) 100%);
+      background:linear-gradient(135deg, rgba(99,102,241,.48) 0%, rgba(79,70,229,.48) 100%);
+      box-shadow:0 4px 16px rgba(79,70,229,.10);
     }
     body.has-wallpaper .topbar .skin-title,
-    body.has-wallpaper .topbar .skin-sub{ text-shadow:0 1px 5px rgba(0,0,0,.45); }
+    body.has-wallpaper .topbar .skin-sub{ text-shadow:0 1px 6px rgba(0,0,0,.55); }
+
+    /* 壁纸模式下首页关键文字加白阴影，确保在复杂照片背景上可读 */
+    body.has-wallpaper .home-card .bal-label,
+    body.has-wallpaper .home-card .bal-num,
+    body.has-wallpaper .home-card .count,
+    body.has-wallpaper .home-card .count b,
+    body.has-wallpaper .home-card .io-box .k,
+    body.has-wallpaper .home-card .io-box .v,
+    body.has-wallpaper .sec-title,
+    body.has-wallpaper .stat-head,
+    body.has-wallpaper .stat-cards .sc .k,
+    body.has-wallpaper .stat-cards .sc .v,
+    body.has-wallpaper .chart-card h4,
+    body.has-wallpaper .day-head,
+    body.has-wallpaper .rec-item .t,
+    body.has-wallpaper .rec-item .s,
+    body.has-wallpaper .rec-item .amt,
+    body.has-wallpaper .empty{ text-shadow:0 1px 4px rgba(255,255,255,.92); }
 
     /* ---------- 首页 ---------- */
     .home-card{background:var(--card);border-radius:var(--radius-lg);padding:22px 20px;box-shadow:var(--shadow-md);margin-bottom:16px;}
@@ -123,6 +144,7 @@
     .home-card .count b{font-size:18px;color:var(--text);}
     .home-card .io-row{display:flex;gap:10px;margin-top:18px;}
     .home-card .io-box{flex:1;background:rgba(79,70,229,.05);border-radius:var(--radius-md);padding:13px 12px;min-width:0;border:1px solid rgba(79,70,229,.08);}
+    body.has-wallpaper .home-card .io-box{background:rgba(255,255,255,.28);border-color:rgba(255,255,255,.42);}
     .home-card .io-box .k{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--sub);white-space:nowrap;}
     .home-card .io-box .k .dot{width:6px;height:6px;border-radius:50%;display:inline-block;}
     .home-card .io-box .k .dot.in{background:var(--in);}
