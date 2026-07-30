@@ -27,3 +27,14 @@
 - HTML5 + CSS3 + 原生 JavaScript
 - IndexedDB 持久化
 - 手写 ZIP+OOXML 生成真 .xlsx（无第三方库）
+
+## 部署（GitHub Actions 自动发布）
+
+本仓库已配置 `.github/workflows/deploy.yml`：每次向 `main` 分支推送代码，GitHub Actions 会自动构建并部署到 GitHub Pages，**全程使用 `GITHUB_TOKEN`，无需任何个人 Token**。
+
+使用步骤：
+1. 仓库 Settings → Pages → Source 选择 **GitHub Actions**；
+2. `git push` 到 `main`，Actions 自动跑完即上线；
+3. 个人 PAT 可随时删除，不影响部署。
+
+正式链接：https://helenzhan2121-hub.github.io/my-accounting-app/
