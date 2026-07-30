@@ -99,13 +99,19 @@
     .view{display:none; padding:0 16px 16px; padding-top:10px;}
     .view.active{display:block;}
 
-    /* 有壁纸时，卡片统一加毛玻璃 */
+    /* 有壁纸时，顶栏与卡片统一半透明+毛玻璃，让背景人物露出来 */
+    body.has-wallpaper .topbar,
     body.has-wallpaper .home-card,
     body.has-wallpaper .rec-item,
     body.has-wallpaper .stat-cards .sc,
     body.has-wallpaper .chart-card,
     body.has-wallpaper .mine-card,
     body.has-wallpaper .cat-mgr-item{ backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+    body.has-wallpaper .topbar{
+      background:linear-gradient(135deg, rgba(99,102,241,.78) 0%, rgba(79,70,229,.78) 100%);
+    }
+    body.has-wallpaper .topbar .skin-title,
+    body.has-wallpaper .topbar .skin-sub{ text-shadow:0 1px 5px rgba(0,0,0,.45); }
 
     /* ---------- 首页 ---------- */
     .home-card{background:var(--card);border-radius:var(--radius-lg);padding:22px 20px;box-shadow:var(--shadow-md);margin-bottom:16px;}
