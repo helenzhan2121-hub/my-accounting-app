@@ -95,11 +95,12 @@
   let curType = 'out';
   let curCat = null;
   let currentMonth = monthOf(todayStr());
-  let settings = { theme: 'cream', avatar: '', wallpaper: '', cats: null };
+  let settings = { theme: 'cream', avatar: '', wallpaper: '', wallpaperMode: 'face', cats: null };
 
   function loadSettings() {
     try { settings = JSON.parse(localStorage.getItem('dz_settings') || '{}'); } catch (e) {}
     if (!settings.theme) settings.theme = 'cream';
+    if (!settings.wallpaperMode) settings.wallpaperMode = 'face';
     if (!settings.cats || !settings.cats.out || !settings.cats.in) {
       settings.cats = JSON.parse(JSON.stringify(DEFAULT_CATS));
     }
@@ -352,10 +353,19 @@
   }
   function applyWallpaper() {
     document.body.classList.toggle('has-wallpaper', !!settings.wallpaper);
+    document.body.classList.remove('wp-mode-face', 'wp-mode-full', 'wp-mode-cover');
+    document.body.classList.add('wp-mode-' + (settings.wallpaperMode || 'face'));
     if (settings.wallpaper) document.body.style.backgroundImage = `url(${settings.wallpaper})`;
     else document.body.style.backgroundImage = '';
     $('#wallPreview').style.display = settings.wallpaper ? 'block' : 'none';
     $('#wallPreview').src = settings.wallpaper || '';
+    $('#wpModeRow').style.display = settings.wallpaper ? 'flex' : 'none';
+    renderWallpaperMode();
+  }
+  function renderWallpaperMode() {
+    document.querySelectorAll('#wpModeRow button').forEach(b => {
+      b.classList.toggle('on', b.dataset.m === settings.wallpaperMode);
+    });
   }
   function applyAvatar() {
     const img = $('#avatar img');
@@ -438,16 +448,6 @@
     $('#catEditMask').classList.add('show');
   }
   function closeCatEdit() { $('#catEditMask').classList.remove('show'); }
-  function addCat() {
-    const name = prompt('新分类名称：', '');
-    if (name === null) return;
-    if (!name.trim()) { alert('名称不能为空'); return; }
-    if (CATS[editType].some(c => c.name === name.trim())) { alert('已存在同名分类'); return; }
-    pickEmoji((emoji) => {
-      CATS[editType].push({ name: name.trim(), icon: emoji || '⭐' });
-      saveSettings(); renderCatMgr();
-    });
-  }
   function addCat() {
     const name = prompt('新分类名称：', '');
     if (name === null) return;
@@ -547,7 +547,10 @@
     });
     $('#uploadWall').addEventListener('change', (e) => {
       if (!e.target.files[0]) return;
-      readFile(e.target.files[0], (url) => { settings.wallpaper = url; saveSettings(); applyWallpaper(); });
+      readFile(e.target.files[0], (url) => { settings.wallpaper = url; settings.wallpaperMode = settings.wallpaperMode || 'face'; saveSettings(); applyWallpaper(); });
+    });
+    document.querySelectorAll('#wpModeRow button').forEach(b => {
+      b.addEventListener('click', () => { settings.wallpaperMode = b.dataset.m; saveSettings(); applyWallpaper(); });
     });
     // 分类管理
     $('#catMgrBtn').addEventListener('click', openCatMgr);

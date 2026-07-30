@@ -24,9 +24,27 @@
       color:var(--text); background:var(--bg); background-attachment:fixed;
       -webkit-font-smoothing:antialiased;
     }
+    /* 壁纸显示模式：face 默认从顶部 cover，优先保证人脸/上半身完整 */
     body.has-wallpaper{
+      background-attachment:fixed !important;
+    }
+    body.wp-mode-face{
+      background-size:cover !important; background-position:center top !important;
+      background-repeat:no-repeat !important;
+    }
+    body.wp-mode-full{
+      background-size:contain !important; background-position:center top !important;
+      background-repeat:no-repeat !important;
+    }
+    body.wp-mode-cover{
       background-size:cover !important; background-position:center !important;
-      background-repeat:no-repeat !important; background-attachment:fixed !important;
+      background-repeat:no-repeat !important;
+    }
+    /* 壁纸暗角蒙层，提升文字可读性 */
+    body.has-wallpaper::before{
+      content:''; position:fixed; inset:0; z-index:-1;
+      background:radial-gradient(circle at center top, rgba(255,255,255,.15) 0%, rgba(0,0,0,.18) 70%);
+      pointer-events:none;
     }
     .app{max-width:480px;margin:0 auto;min-height:100%;position:relative;padding-bottom:86px;}
     /* 顶部 header */
@@ -50,7 +68,7 @@
       background:rgba(255,255,255,.25) url('data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"white\"><path d=\"M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z\"/></svg>') center/60% no-repeat;
       overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.15);
     }
-    .topbar .avatar img{width:100%;height:100%;object-fit:cover;}
+    .topbar .avatar img{width:100%;height:100%;object-fit:cover;object-position:center top;}
 
     /* 视图 */
     .view{display:none; padding:0 16px 16px; padding-top:8px;}
@@ -117,7 +135,11 @@
     .upload-row{display:flex; gap:10px; margin-top:10px;}
     .upload-row label{flex:1; display:block; background:rgba(255,255,255,.5); border-radius:12px; padding:12px; text-align:center; font-size:13px; color:var(--sub); cursor:pointer; border:1px dashed var(--line);}
     .upload-row input{display:none;}
-    .preview-img{width:100%; max-height:120px; object-fit:cover; border-radius:12px; margin-top:10px; display:none;}
+    .preview-img{width:100%; max-height:220px; object-fit:contain; border-radius:12px; margin-top:10px; display:none; background:rgba(0,0,0,.06);}
+    .wp-mode-row{display:flex; align-items:center; gap:8px; margin-top:12px; flex-wrap:wrap;}
+    .wp-mode-row .hint{font-size:12px; color:var(--sub); margin-right:4px;}
+    .wp-mode-row button{border:1px solid var(--line); background:rgba(255,255,255,.5); border-radius:20px; padding:6px 12px; font-size:12px; color:var(--text);}
+    .wp-mode-row button.on{background:var(--text); color:#fff; border-color:var(--text);}
 
     /* 底部 tab */
     .tabbar{
@@ -269,6 +291,12 @@
           <label><input type="file" id="uploadWall" accept="image/*">🖼 上传壁纸</label>
         </div>
         <img class="preview-img" id="wallPreview" alt="壁纸预览">
+        <div class="wp-mode-row" id="wpModeRow" style="display:none;">
+          <span class="hint">显示模式</span>
+          <button data-m="face" class="on">智能人脸</button>
+          <button data-m="full">完整显示</button>
+          <button data-m="cover">铺满裁切</button>
+        </div>
       </div>
       <div class="mine-card">
         <h4>数据管理</h4>
