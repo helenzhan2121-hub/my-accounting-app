@@ -6,26 +6,30 @@
   const STORE = 'records';
   const $ = (s) => document.querySelector(s);
 
-  // ---------- 分类 ----------
-  const CATS = {
+  // ---------- 分类（预置清单，用户可自定义增删改） ----------
+  const DEFAULT_CATS = {
     out: [
-      { name: '餐饮', icon: '🍜' }, { name: '交通', icon: '🚌' }, { name: '购物', icon: '🛍' },
-      { name: '娱乐', icon: '🎮' }, { name: '居住', icon: '🏠' }, { name: '医疗', icon: '💊' },
-      { name: '教育', icon: '📚' }, { name: '其他', icon: '📦' }
+      { name: '餐饮', icon: '🍜' }, { name: '奶茶', icon: '🧋' }, { name: '交通', icon: '🚌' },
+      { name: '购物', icon: '🛍️' }, { name: '美妆', icon: '💄' }, { name: '服饰', icon: '👗' },
+      { name: '房租', icon: '🏠' }, { name: '水电费', icon: '💡' }, { name: '宠物', icon: '🐱' },
+      { name: '医疗', icon: '💊' }, { name: '娱乐', icon: '🎮' }, { name: '其他', icon: '📦' }
     ],
     in: [
-      { name: '工资', icon: '💰' }, { name: '兼职', icon: '💼' }, { name: '货款', icon: '📦' },
-      { name: '服务费', icon: '🤝' }, { name: '退款', icon: '↩️' }, { name: '其他', icon: '🧧' }
+      { name: '工资', icon: '💰' }, { name: '兼职', icon: '💼' }, { name: '理财', icon: '📈' },
+      { name: '红包', icon: '🧧' }, { name: '退款', icon: '↩️' }, { name: '其他', icon: '✨' }
     ]
   };
+  // 运行期分类（从设置读取，缺失则用预置）
+  let CATS = { out: [], in: [] };
 
-  // ---------- 主题 ----------
+  // ---------- 主题（马卡龙 / 奶油色系，可爱风） ----------
   const THEMES = [
-    { key: 'blue',  name: '经典蓝', color: '#1F67FE', bg: '#F2F4F8', icon: '🌊' },
-    { key: 'qing',  name: '鲨鱼青', color: '#2dd4bf', bg: '#e6f7f4', icon: '🦈' },
-    { key: 'dark',  name: '暗夜',   color: '#5b8cff', bg: '#15171c', icon: '🌙' },
-    { key: 'pink',  name: '樱粉',   color: '#ec5a8d', bg: '#fdeef3', icon: '🌸' },
-    { key: 'sun',   name: '暖阳',   color: '#f59e0b', bg: '#fff5e6', icon: '🌞' }
+    { key: 'cream', name: '奶油蓝', color: '#8ab4ff', bg: '#eef4ff', icon: '🫧' },
+    { key: 'mint',  name: '薄荷青', color: '#5ed6c0', bg: '#e6faf5', icon: '🍃' },
+    { key: 'peach', name: '蜜桃粉', color: '#ff9eb5', bg: '#fff0f4', icon: '🍑' },
+    { key: 'sakura',name: '樱花粉', color: '#f6a5c0', bg: '#fdeef5', icon: '🌸' },
+    { key: 'sun',   name: '暖阳黄', color: '#ffc857', bg: '#fff7e6', icon: '🌞' },
+    { key: 'grape', name: '葡萄紫', color: '#b39ddb', bg: '#f3edfb', icon: '🍇' }
   ];
 
   // ---------- IndexedDB ----------
@@ -82,13 +86,18 @@
   // ---------- state ----------
   let records = [];
   let curType = 'out';
-  let curCat = CATS.out[0];
+  let curCat = null;
   let currentMonth = monthOf(todayStr());
-  let settings = { theme: 'blue', avatar: '', wallpaper: '' };
+  let settings = { theme: 'cream', avatar: '', wallpaper: '', cats: null };
 
   function loadSettings() {
     try { settings = JSON.parse(localStorage.getItem('dz_settings') || '{}'); } catch (e) {}
-    if (!settings.theme) settings.theme = 'blue';
+    if (!settings.theme) settings.theme = 'cream';
+    if (!settings.cats || !settings.cats.out || !settings.cats.in) {
+      settings.cats = JSON.parse(JSON.stringify(DEFAULT_CATS));
+    }
+    CATS = settings.cats;
+    curCat = CATS[curType][0];
   }
   function saveSettings() { localStorage.setItem('dz_settings', JSON.stringify(settings)); }
 
@@ -349,7 +358,73 @@
     r.readAsDataURL(file);
   }
 
-  // ---------- 导出 / 备份 ----------
+  // ---------- 分类管理（自定义增删改） ----------
+  const EMOJI_POOL = ['🍜','🧋','🚌','🛍️','💄','👗','🏠','💡','🐱','💊','🎮','📦','💰','💼','📈','🧧','↩️','✨','🍰','🎀','🌸','☕','📚','✈️','🍔','🍱','🐶','🐰','💅','🛒','🏥','🎁','📱','💻','🧴','👟','🍉','🥤','🎬','📖'];
+  let editType = 'out';
+  function openCatMgr() {
+    editType = curType;
+    $('#catMgrMask').classList.add('show');
+    renderCatMgr();
+  }
+  function closeCatMgr() { $('#catMgrMask').classList.remove('show'); }
+  function renderCatMgr() {
+    document.querySelectorAll('#catMgrTabs button').forEach(b => b.classList.toggle('on', b.dataset.v === editType));
+    const list = CATS[editType];
+    $('#catMgrList').innerHTML = list.map((c, i) => `
+      <div class="cat-mgr-item">
+        <span class="e">${c.icon}</span>
+        <span class="n">${esc(c.name)}</span>
+        <span class="ops">
+          <button data-act="edit" data-i="${i}">✏️</button>
+          <button data-act="del" data-i="${i}">🗑</button>
+        </span>
+      </div>`).join('');
+    $('#catMgrList').querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => {
+        const i = +b.dataset.i;
+        if (b.dataset.act === 'del') {
+          const c = CATS[editType][i];
+          if (c.name === '其他') { alert('「其他」是兜底分类，不能删哦～'); return; }
+          if (confirm(`删除分类「${c.name}」？已有该分类的记账会保留并显示原名。`)) {
+            CATS[editType].splice(i, 1); saveSettings(); renderCatMgr();
+          }
+        } else {
+          editCat(i);
+        }
+      });
+    });
+  }
+  function editCat(i) {
+    const c = CATS[editType][i];
+    const name = prompt('分类名称：', c.name);
+    if (name === null) return;
+    if (!name.trim()) { alert('名称不能为空'); return; }
+    pickEmoji((emoji) => {
+      CATS[editType][i] = { name: name.trim(), icon: emoji || c.icon };
+      saveSettings(); renderCatMgr();
+    }, c.icon);
+  }
+  function addCat() {
+    const name = prompt('新分类名称：', '');
+    if (name === null) return;
+    if (!name.trim()) { alert('名称不能为空'); return; }
+    if (CATS[editType].some(c => c.name === name.trim())) { alert('已存在同名分类'); return; }
+    pickEmoji((emoji) => {
+      CATS[editType].push({ name: name.trim(), icon: emoji || '⭐' });
+      saveSettings(); renderCatMgr();
+    });
+  }
+  function pickEmoji(cb, cur) {
+    const grid = EMOJI_POOL.map(e => `<span class="emoji-pick" data-e="${e}">${e}</span>`).join('');
+    $('#emojiPicker').innerHTML = grid;
+    $('#emojiPickerMask').classList.add('show');
+    $('#emojiPicker').querySelectorAll('.emoji-pick').forEach(el => {
+      el.addEventListener('click', () => {
+        $('#emojiPickerMask').classList.remove('show');
+        cb(el.dataset.e);
+      });
+    });
+  }
   function exportExcel() {
     if (!records.length) { alert('还没有数据可导出'); return; }
     const exp = records.slice().sort((a, b) => (a.date + a.id).localeCompare(b.date + b.id));
@@ -430,6 +505,13 @@
       if (!e.target.files[0]) return;
       readFile(e.target.files[0], (url) => { settings.wallpaper = url; saveSettings(); applyWallpaper(); });
     });
+    // 分类管理
+    $('#catMgrBtn').addEventListener('click', openCatMgr);
+    $('#closeCatMgr').addEventListener('click', closeCatMgr);
+    $('#catMgrMask').addEventListener('click', (e) => { if (e.target.id === 'catMgrMask') closeCatMgr(); });
+    $('#addCatBtn').addEventListener('click', addCat);
+    document.querySelectorAll('#catMgrTabs button').forEach(b => b.addEventListener('click', () => { editType = b.dataset.v; renderCatMgr(); }));
+    $('#emojiPickerMask').addEventListener('click', (e) => { if (e.target.id === 'emojiPickerMask') $('#emojiPickerMask').classList.remove('show'); });
     window.addEventListener('resize', () => { if ($('#viewStats').classList.contains('active')) renderStats(); });
   }
 

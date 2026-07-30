@@ -13,14 +13,14 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     :root{
-      --blue:#1F67FE; --blue-d:#1550d6; --bg:#F2F4F8; --card:rgba(255,255,255,.72);
-      --text:#1c2533; --sub:#6b7280; --line:rgba(255,255,255,.35);
-      --in:#16a34a; --out:#ef4444;
+      --blue:#8ab4ff; --blue-d:#6f9bf5; --bg:#eef4ff; --card:rgba(255,255,255,.78);
+      --text:#3a3550; --sub:#9b94b0; --line:rgba(255,255,255,.4);
+      --in:#5ec98a; --out:#ff8fa3;
     }
     *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
     html,body{margin:0;padding:0;height:100%;}
     body{
-      font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Segoe UI",Roboto,sans-serif;
+      font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
       color:var(--text); background:var(--bg); background-attachment:fixed;
       -webkit-font-smoothing:antialiased;
     }
@@ -52,19 +52,19 @@
 
     /* 首页 */
     .home-card{
-      background:var(--card); border-radius:24px; padding:22px 18px;
-      box-shadow:0 8px 32px rgba(0,0,0,.08); backdrop-filter:blur(12px);
+      background:var(--card); border-radius:28px; padding:24px 20px;
+      box-shadow:0 10px 36px rgba(138,180,255,.18); backdrop-filter:blur(12px);
       margin-bottom:16px;
     }
     .home-card .bal-row{display:flex; align-items:flex-end; justify-content:space-between;}
     .home-card .bal-label{font-size:13px; color:var(--sub);}
-    .home-card .bal-num{font-size:36px; font-weight:800; margin-top:4px; letter-spacing:-.5px;}
+    .home-card .bal-num{font-size:38px; font-weight:800; margin-top:4px; letter-spacing:-.5px; color:var(--text);}
     .home-card .count{font-size:13px; color:var(--sub); text-align:right;}
     .home-card .count b{font-size:18px; color:var(--text);}
     .home-card .io-row{display:flex; gap:10px; margin-top:18px;}
-    .home-card .io-box{flex:1; background:rgba(255,255,255,.55); border-radius:16px; padding:12px;}
+    .home-card .io-box{flex:1; background:rgba(255,255,255,.6); border-radius:18px; padding:14px;}
     .home-card .io-box .k{font-size:12px; color:var(--sub);}
-    .home-card .io-box .v{font-size:18px; font-weight:700; margin-top:3px;}
+    .home-card .io-box .v{font-size:19px; font-weight:700; margin-top:3px;}
     .home-card .io-box .v.in{color:var(--in);}
     .home-card .io-box .v.out{color:var(--out);}
     .sec-title{display:flex; justify-content:space-between; align-items:center; font-size:15px; font-weight:700; margin:18px 4px 10px; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,.2);}
@@ -75,11 +75,11 @@
     .day-head{display:flex; justify-content:space-between; align-items:center; padding:10px 4px; font-size:13px; color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.2);}
     .day-head .tag{background:rgba(0,0,0,.12); padding:2px 8px; border-radius:10px; font-size:11px; margin-left:8px;}
     .rec-item{
-      background:var(--card); border-radius:18px; padding:13px 14px; margin-bottom:10px;
-      display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(0,0,0,.06);
+      background:var(--card); border-radius:20px; padding:14px 15px; margin-bottom:10px;
+      display:flex; align-items:center; gap:12px; box-shadow:0 4px 16px rgba(138,180,255,.12);
       backdrop-filter:blur(10px);
     }
-    .rec-item .icon{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+    .rec-item .icon{width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.6);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
     .rec-item .mid{flex:1;min-width:0;}
     .rec-item .t{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
     .rec-item .s{font-size:12px;color:var(--sub);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -115,25 +115,25 @@
     .tabbar{
       position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom) + 8px);
       width:calc(100% - 28px); max-width:452px; z-index:50;
-      background:var(--card); border-radius:26px; padding:8px 0;
+      background:var(--card); border-radius:28px; padding:9px 0;
       display:flex; justify-content:space-around; align-items:center;
-      box-shadow:0 8px 30px rgba(0,0,0,.12); backdrop-filter:blur(16px);
+      box-shadow:0 8px 30px rgba(138,180,255,.22); backdrop-filter:blur(16px);
     }
     .tabbar .tab{flex:1; text-align:center; padding:5px 0; color:var(--sub); font-size:11px; border:none; background:transparent;}
     .tabbar .tab .ico{font-size:22px; display:block; margin-bottom:2px;}
     .tabbar .tab.on{color:var(--blue); font-weight:700;}
     .tabbar .add-btn{
-      width:48px; height:48px; border-radius:50%; background:var(--text); color:#fff; border:none;
-      display:flex; align-items:center; justify-content:center; font-size:26px; margin-top:-22px;
-      box-shadow:0 6px 18px rgba(0,0,0,.25);
+      width:52px; height:52px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--blue-d)); color:#fff; border:none;
+      display:flex; align-items:center; justify-content:center; font-size:28px; margin-top:-24px;
+      box-shadow:0 6px 18px rgba(138,180,255,.5);
     }
 
     /* sheet 记一笔 */
-    .sheet-mask{position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:60; display:none; align-items:flex-end; justify-content:center;}
+    .sheet-mask{position:fixed; inset:0; background:rgba(80,70,120,.4); z-index:60; display:none; align-items:flex-end; justify-content:center;}
     .sheet-mask.show{display:flex;}
     .sheet{
-      background:#fff; width:100%; max-width:480px; max-height:88vh; overflow:auto;
-      border-radius:28px 28px 0 0; padding:20px 18px calc(env(safe-area-inset-bottom) + 18px);
+      background:linear-gradient(180deg,#fdfcff,#fff); width:100%; max-width:480px; max-height:88vh; overflow:auto;
+      border-radius:32px 32px 0 0; padding:22px 20px calc(env(safe-area-inset-bottom) + 18px);
       animation:up .28s ease;
     }
     @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
@@ -153,6 +153,36 @@
     .cat-grid .cat .emoji{width:52px;height:52px;border-radius:16px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:26px;border:2px solid transparent;}
     .cat-grid .cat.on .emoji{border-color:var(--blue); background:#eef3ff;}
     .cat-grid .cat span{font-size:12px; color:var(--sub);}
+
+    /* 分类管理面板 */
+    .cat-mgr-mask{position:fixed; inset:0; background:rgba(80,70,120,.4); z-index:62; display:none; align-items:flex-end; justify-content:center;}
+    .cat-mgr-mask.show{display:flex;}
+    .cat-mgr{
+      background:#fff; width:100%; max-width:480px; max-height:84vh; overflow:auto;
+      border-radius:32px 32px 0 0; padding:22px 20px calc(env(safe-area-inset-bottom) + 18px);
+      animation:up .28s ease;
+    }
+    .cat-mgr .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;}
+    .cat-mgr .top h3{margin:0; font-size:18px;}
+    .cat-mgr .top .close{width:32px;height:32px;border-radius:50%;border:none;background:#f2f0f7;color:var(--text);font-size:18px;}
+    .cat-mgr-tabs{display:flex; gap:8px; margin-bottom:16px;}
+    .cat-mgr-tabs button{flex:1; border:none; background:#f3f0f8; padding:10px; border-radius:14px; font-size:15px; font-weight:700; color:var(--sub);}
+    .cat-mgr-tabs button.on{background:#eef3ff; color:var(--blue);}
+    .cat-mgr-list{display:flex; flex-direction:column; gap:10px; margin-bottom:16px;}
+    .cat-mgr-item{display:flex; align-items:center; gap:12px; background:#faf8ff; border-radius:16px; padding:12px 14px;}
+    .cat-mgr-item .e{font-size:24px; width:34px; text-align:center;}
+    .cat-mgr-item .n{flex:1; font-size:15px; font-weight:600;}
+    .cat-mgr-item .ops{display:flex; gap:6px;}
+    .cat-mgr-item .ops button{border:none; background:#fff; border-radius:10px; width:38px; height:34px; font-size:16px; box-shadow:0 2px 6px rgba(0,0,0,.05);}
+    .cat-mgr-add{width:100%; background:linear-gradient(135deg,var(--blue),var(--blue-d)); color:#fff; border:none; border-radius:16px; padding:15px; font-size:16px; font-weight:700;}
+
+    /* emoji 选择器 */
+    .emoji-mask{position:fixed; inset:0; background:rgba(80,70,120,.4); z-index:64; display:none; align-items:center; justify-content:center; padding:24px;}
+    .emoji-mask.show{display:flex;}
+    .emoji-picker{background:#fff; width:100%; max-width:420px; border-radius:24px; padding:18px; max-height:70vh; overflow:auto;}
+    .emoji-picker .grid{display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-top:10px;}
+    .emoji-pick{font-size:26px; text-align:center; padding:8px 0; border-radius:12px; cursor:pointer; background:#faf8ff;}
+    .emoji-pick:active{background:#eef3ff;}
     .field-line{margin-bottom:14px;}
     .field-line label{display:block;font-size:12px;color:var(--sub);margin-bottom:5px;}
     .field-line input, .field-line select{width:100%;border:1px solid #e5e7eb;border-radius:12px;padding:12px;font-size:15px;background:#fafbfc;}
@@ -221,6 +251,10 @@
         <div class="theme-row" id="themeRow"></div>
       </div>
       <div class="mine-card">
+        <h4>分类管理</h4>
+        <button class="action-btn" id="catMgrBtn">✏️ 自定义收支分类</button>
+      </div>
+      <div class="mine-card">
         <h4>个性化背景</h4>
         <div class="upload-row">
           <label><input type="file" id="uploadAvatar" accept="image/*">📷 上传头像</label>
@@ -262,6 +296,27 @@
       <div class="field-line"><label>日期</label><input type="date" id="fDate"></div>
       <div class="field-line"><label>备注</label><input type="text" id="fNote" placeholder="如：打车 / 货款"></div>
       <button class="save-btn" id="saveBtn">保存</button>
+    </div>
+  </div>
+
+  <!-- 分类管理面板 -->
+  <div class="cat-mgr-mask" id="catMgrMask">
+    <div class="cat-mgr">
+      <div class="top"><h3>分类管理</h3><button class="close" id="closeCatMgr">✕</button></div>
+      <div class="cat-mgr-tabs" id="catMgrTabs">
+        <button data-v="out" class="out">支出分类</button>
+        <button data-v="in" class="in">收入分类</button>
+      </div>
+      <div class="cat-mgr-list" id="catMgrList"></div>
+      <button class="cat-mgr-add" id="addCatBtn">＋ 新增分类</button>
+    </div>
+  </div>
+
+  <!-- emoji 选择器 -->
+  <div class="emoji-mask" id="emojiPickerMask">
+    <div class="emoji-picker">
+      <div style="font-size:14px;font-weight:700;color:var(--sub);">选一个可爱图标</div>
+      <div class="grid" id="emojiPicker"></div>
     </div>
   </div>
 
