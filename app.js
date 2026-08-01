@@ -203,6 +203,18 @@
         fDate.style.display = '';
         fNote.style.display = '';
         fAmt.focus();
+        // 注入分类选择（行内编辑也能换分类图标）
+        const catPop = document.createElement('div');
+        catPop.className = 'cat-grid';
+        catPop.id = 'inlineCatGrid';
+        catPop.style.margin = '12px 0 4px';
+        catPop.innerHTML = CATS[el.dataset.type].map(c => `<div class="cat ${c.name === el.dataset.cat ? 'on' : ''}" data-name="${c.name}"><div class="emoji">${c.icon}</div><span>${c.name}</span></div>`).join('');
+        el.querySelector('.mid').appendChild(catPop);
+        catPop.querySelectorAll('.cat').forEach(el2 => el2.addEventListener('click', () => {
+          el.dataset.cat = el2.dataset.name;
+          catPop.querySelectorAll('.cat').forEach(x => x.classList.remove('on'));
+          el2.classList.add('on');
+        }));
         editBtn.textContent = '💾';
         editBtn.title = '保存';
         editBtn.onclick = () => {
