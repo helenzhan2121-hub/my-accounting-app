@@ -168,23 +168,55 @@
 
   function recHtml(r) {
     return `
-      <div class="rec-item" data-id="${r.id}">
+      <div class="rec-item" data-id="${r.id}" data-type="${r.type}" data-cat="${esc(r.cat)}">
         <div class="rec-main">
           <div class="icon">${getIcon(r.cat, r.type)}</div>
           <div class="mid">
-            <div class="t">${esc(r.cat)}${r.note ? ' · ' + esc(r.note) : ''}</div>
-            <div class="s">${r.date}</div>
+            <input class="f-amt" type="number" step="0.01" value="${r.amt}" style="display:none">
+            <input class="f-date" type="date" value="${r.date}" style="display:none">
+            <input class="f-note" type="text" value="${esc(r.note || '')}" style="display:none">
+            <div class="disp">
+              <div class="t">${esc(r.cat)}${r.note ? ' · ' + esc(r.note) : ''}</div>
+              <div class="s">${r.date}</div>
+            </div>
+            <div class="amt ${r.type === 'in' ? 'in' : 'out'}">${r.type === 'in' ? '+' : '-'}${fmt(r.amt).slice(1)}</div>
           </div>
-          <div class="amt ${r.type === 'in' ? 'in' : 'out'}">${r.type === 'in' ? '+' : '-'}${fmt(r.amt).slice(1)}</div>
         </div>
-        <button class="del-btn" data-act="del" title="删除">🗑</button>
+        <div class="rec-actions">
+          <button class="edit-btn" data-act="edit" title="编辑">✎</button>
+          <button class="del-btn" data-act="del" title="删除">🗑</button>
+        </div>
       </div>`;
   }
   function bindRecClicks(box) {
     box.querySelectorAll('.rec-item').forEach(el => {
-      const main = el.querySelector('.rec-main');
+      const editBtn = el.querySelector('.edit-btn');
       const delBtn = el.querySelector('.del-btn');
-      main.addEventListener('click', () => openSheet(el.dataset.id));
+      const disp = el.querySelector('.disp');
+      const fAmt = el.querySelector('.f-amt');
+      const fDate = el.querySelector('.f-date');
+      const fNote = el.querySelector('.f-note');
+      editBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        disp.style.display = 'none';
+        fAmt.style.display = '';
+        fDate.style.display = '';
+        fNote.style.display = '';
+        fAmt.focus();
+        editBtn.textContent = '💾';
+        editBtn.title = '保存';
+        editBtn.onclick = () => {
+          const id = el.dataset.id;
+          const type = el.dataset.type;
+          const cat = el.dataset.cat;
+          const amt = parseFloat(fAmt.value);
+          const date = fDate.value;
+          const note = fNote.value.trim();
+          if (!(amt > 0)) { alert('请输入有效金额'); return; }
+          const rec = { id, type, cat, amt: amt.toFixed(2), date, note };
+          put(rec).then(load);
+        };
+      });
       delBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         if (confirm('删除这条记录？')) del(el.dataset.id).then(load);
