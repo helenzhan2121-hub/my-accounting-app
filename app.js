@@ -95,6 +95,7 @@
   let curType = 'out';
   let curCat = null;
   let currentMonth = monthOf(todayStr());
+  let editingId = null;
   let settings = { theme: 'indigo', avatar: '', wallpaper: '', wallpaperMode: 'face', cats: null };
 
   function loadSettings() {
@@ -168,17 +169,26 @@
   function recHtml(r) {
     return `
       <div class="rec-item" data-id="${r.id}">
-        <div class="icon">${getIcon(r.cat, r.type)}</div>
-        <div class="mid">
-          <div class="t">${esc(r.cat)}${r.note ? ' · ' + esc(r.note) : ''}</div>
-          <div class="s">${r.date}</div>
+        <div class="rec-main">
+          <div class="icon">${getIcon(r.cat, r.type)}</div>
+          <div class="mid">
+            <div class="t">${esc(r.cat)}${r.note ? ' · ' + esc(r.note) : ''}</div>
+            <div class="s">${r.date}</div>
+          </div>
+          <div class="amt ${r.type === 'in' ? 'in' : 'out'}">${r.type === 'in' ? '+' : '-'}${fmt(r.amt).slice(1)}</div>
         </div>
-        <div class="amt ${r.type === 'in' ? 'in' : 'out'}">${r.type === 'in' ? '+' : '-'}${fmt(r.amt).slice(1)}</div>
+        <button class="del-btn" data-act="del" title="删除">🗑</button>
       </div>`;
   }
   function bindRecClicks(box) {
     box.querySelectorAll('.rec-item').forEach(el => {
-      el.addEventListener('click', () => { if (confirm('删除这条记录？')) del(el.dataset.id).then(load); });
+      const main = el.querySelector('.rec-main');
+      const delBtn = el.querySelector('.del-btn');
+      main.addEventListener('click', () => openSheet(el.dataset.id));
+      delBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (confirm('删除这条记录？')) del(el.dataset.id).then(load);
+      });
     });
   }
 
@@ -284,16 +294,31 @@
     });
   }
 
-  // ---------- 记一笔 ----------
-  function openSheet() {
+  // ---------- 记一笔 / 编辑记录 ----------
+  function openSheet(id) {
+    editingId = id || null;
+    $('#sheetTitle').textContent = editingId ? '编辑记录' : '记一笔';
+    $('#saveTopBtn').textContent = editingId ? '更新' : '保存';
+    $('#saveBtn').textContent = editingId ? '更新记录' : '保存';
+    if (editingId) {
+      const r = records.find(x => x.id === id);
+      if (!r) return;
+      $('#fDate').value = r.date;
+      $('#fAmt').value = r.amt;
+      $('#fNote').value = r.note || '';
+      setType(r.type);
+      curCat = CATS[r.type].find(c => c.name === r.cat) || CATS[r.type][0];
+      renderCatGrid();
+    } else {
+      $('#fDate').value = todayStr();
+      $('#fAmt').value = '';
+      $('#fNote').value = '';
+      setType('out');
+    }
     $('#sheetMask').classList.add('show');
-    $('#fDate').value = todayStr();
-    $('#fAmt').value = '';
-    $('#fNote').value = '';
-    setType('out');
-    renderCatGrid();
+    setTimeout(() => $('#fAmt').focus(), 120);
   }
-  function closeSheet() { $('#sheetMask').classList.remove('show'); }
+  function closeSheet() { $('#sheetMask').classList.remove('show'); editingId = null; }
   function setType(t) {
     curType = t;
     document.querySelectorAll('#typeTabs button').forEach(b => {
@@ -315,7 +340,7 @@
     const amt = parseFloat($('#fAmt').value);
     if (!(amt > 0)) { alert('请输入金额'); return; }
     const rec = {
-      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      id: editingId || Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
       type: curType,
       amt: amt.toFixed(2),
       cat: curCat.name,
@@ -527,10 +552,11 @@
 
   function bind() {
     document.querySelectorAll('.tabbar .tab').forEach(t => t.addEventListener('click', () => switchView(t.dataset.view)));
-    $('#addBtn').addEventListener('click', openSheet);
+    $('#addBtn').addEventListener('click', () => openSheet());
     $('#closeSheet').addEventListener('click', closeSheet);
     $('#sheetMask').addEventListener('click', (e) => { if (e.target.id === 'sheetMask') closeSheet(); });
     $('#saveBtn').addEventListener('click', save);
+    $('#saveTopBtn').addEventListener('click', save);
     document.querySelectorAll('#typeTabs button').forEach(b => b.addEventListener('click', () => setType(b.dataset.v)));
     $('#toDetail').addEventListener('click', () => switchView('detail'));
     $('#prevMonth').addEventListener('click', () => { currentMonth = prevMonth(currentMonth); renderStats(); });

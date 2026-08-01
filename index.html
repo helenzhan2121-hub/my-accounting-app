@@ -159,7 +159,8 @@
     .day-group{margin-bottom:14px;}
     .day-head{display:flex;justify-content:space-between;align-items:center;padding:10px 4px;font-size:13px;color:var(--text);font-weight:600;}
     .day-head .tag{background:rgba(17,24,39,.08);padding:2px 8px;border-radius:10px;font-size:11px;margin-left:8px;color:var(--sub);}
-    .rec-item{background:var(--card);border-radius:var(--radius-lg);padding:14px 15px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-sm);}
+    .rec-item{background:var(--card);border-radius:var(--radius-lg);padding:10px 10px 10px 15px;margin-bottom:10px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-sm);}
+    .rec-item .rec-main{flex:1;display:flex;align-items:center;gap:12px;min-width:0;}
     .rec-item .icon{width:46px;height:46px;border-radius:14px;background:rgba(79,70,229,.08);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
     .rec-item .mid{flex:1;min-width:0;}
     .rec-item .t{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -167,6 +168,7 @@
     .rec-item .amt{font-size:17px;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;}
     .rec-item .amt.in{color:var(--in);}
     .rec-item .amt.out{color:var(--out);}
+    .rec-item .del-btn{width:34px;height:34px;border-radius:50%;border:none;background:#fee2e2;color:#ef4444;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;}
 
     /* ---------- 统计 ---------- */
     .stat-head{display:flex;align-items:center;justify-content:center;gap:14px;margin:4px 0 16px;color:var(--text);font-size:17px;font-weight:700;}
@@ -218,11 +220,15 @@
     /* ---------- 记一笔 sheet ---------- */
     .sheet-mask{position:fixed;inset:0;background:rgba(17,24,39,.45);z-index:60;display:none;align-items:flex-end;justify-content:center;}
     .sheet-mask.show{display:flex;}
-    .sheet{background:#fff;width:100%;max-width:480px;max-height:88vh;overflow:auto;border-radius:28px 28px 0 0;padding:22px 20px calc(env(safe-area-inset-bottom) + 18px);animation:up .28s ease;}
+    .sheet{background:#fff;width:100%;max-width:480px;max-height:88vh;border-radius:28px 28px 0 0;padding:22px 20px calc(env(safe-area-inset-bottom) + 10px);animation:up .28s ease;display:flex;flex-direction:column;}
     @keyframes up{from{transform:translateY(100%)}to{transform:translateY(0)}}
-    .sheet .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
-    .sheet .top h3{margin:0;font-size:18px;color:var(--text);}
-    .sheet .top .close{width:32px;height:32px;border-radius:50%;border:none;background:#f1f3f8;color:var(--text);font-size:18px;}
+    .sheet .top{flex-shrink:0;display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
+    .sheet .top h3{margin:0;font-size:18px;color:var(--text);flex:1;}
+    .sheet .top .save-top-btn{background:var(--blue);color:#fff;border:none;border-radius:var(--radius-md);padding:8px 16px;font-size:14px;font-weight:700;margin-right:10px;}
+    .sheet .top .close{width:32px;height:32px;border-radius:50%;border:none;background:#f1f3f8;color:var(--text);font-size:18px;flex-shrink:0;}
+    .sheet-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-right:2px;}
+    .save-bar{flex-shrink:0;padding-top:10px;background:#fff;}
+    .save-btn{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-md);padding:16px;font-size:17px;font-weight:700;}
     .type-tabs{display:flex;background:#f1f3f8;border-radius:var(--radius-md);padding:4px;margin-bottom:18px;}
     .type-tabs button{flex:1;border:none;background:transparent;padding:10px;border-radius:10px;font-size:15px;font-weight:700;color:var(--sub);transition:var(--transition);}
     .type-tabs button.on.in{background:#e7f6ee;color:var(--in);}
@@ -373,16 +379,18 @@
   <!-- 记一笔 sheet -->
   <div class="sheet-mask" id="sheetMask">
     <div class="sheet">
-      <div class="top"><h3>记一笔</h3><button class="close" id="closeSheet">✕</button></div>
-      <div class="type-tabs" id="typeTabs">
-        <button data-v="out" class="out">支出</button>
-        <button data-v="in" class="in">收入</button>
+      <div class="top"><h3 id="sheetTitle">记一笔</h3><button class="save-top-btn" id="saveTopBtn">保存</button><button class="close" id="closeSheet">✕</button></div>
+      <div class="sheet-body">
+        <div class="type-tabs" id="typeTabs">
+          <button data-v="out" class="out">支出</button>
+          <button data-v="in" class="in">收入</button>
+        </div>
+        <div class="amt-field"><span class="prefix">¥</span><input type="number" inputmode="decimal" id="fAmt" placeholder="0.00"></div>
+        <div class="cat-grid" id="catGrid"></div>
+        <div class="field-line"><label>日期</label><input type="date" id="fDate"></div>
+        <div class="field-line"><label>备注</label><input type="text" id="fNote" placeholder="如：打车 / 货款"></div>
       </div>
-      <div class="amt-field"><span class="prefix">¥</span><input type="number" inputmode="decimal" id="fAmt" placeholder="0.00"></div>
-      <div class="cat-grid" id="catGrid"></div>
-      <div class="field-line"><label>日期</label><input type="date" id="fDate"></div>
-      <div class="field-line"><label>备注</label><input type="text" id="fNote" placeholder="如：打车 / 货款"></div>
-      <button class="save-btn" id="saveBtn">保存</button>
+      <div class="save-bar"><button class="save-btn" id="saveBtn">保存</button></div>
     </div>
   </div>
 
