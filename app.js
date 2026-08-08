@@ -767,9 +767,9 @@
   }
   function renderPeriodCalendar(periodSet, predictSet, fertileSet, ovulationSet, today) {
     const y = +periodMonth.slice(0, 4), m = +periodMonth.slice(5, 7);
-    const first = new Date(y, m - 1, 1).getDay();
+    const first = (new Date(y, m - 1, 1).getDay() + 6) % 7;
     const dim = new Date(y, m, 0).getDate();
-    const wnames = ['日', '一', '二', '三', '四', '五', '六'];
+    const wnames = ['一', '二', '三', '四', '五', '六', '日'];
     const cells = [wnames.map(w => `<div class="pc-w">${w}</div>`).join('')];
     for (let i = 0; i < first; i++) cells.push('<div class="pc-cell empty"></div>');
     for (let d = 1; d <= dim; d++) {
@@ -813,8 +813,9 @@
   function renderPeriodPanel(date) {
     const log = periodLogs[date] || { date, period: false, flow: '', pain: 0, mood: '', note: '', color: '', time: '' };
     $('#pDayTitle').textContent = date;
-    $('#pDayPeriodYes').classList.toggle('on', !!log.period);
-    $('#pDayPeriodNo').classList.toggle('on', !log.period);
+    const btn = $('#pDayPeriodYes');
+    btn.textContent = log.period ? '🩸 已标记为经期（点击取消）' : '🩸 月经来了';
+    btn.classList.toggle('on', !!log.period);
     $('#pFlow').value = log.flow || '';
     $('#pColor').value = log.color || '';
     $('#pPain').value = log.pain || 0;
@@ -824,9 +825,20 @@
     const isPeriod = !!log.period;
     $('#periodOnlyGroup').style.display = isPeriod ? 'block' : 'none';
   }
-  function savePeriodDay() {
-    const date = $('#pDayTitle').textContent;
-    const period = $('#pDayPeriodYes').classList.contains('on');
+  function togglePeriodDay() {
+    const date = selectedPDate;
+    const log = periodLogs[date] || { date, period: false, flow: '', pain: 0, mood: '', note: '', color: '', time: '' };
+    const nextPeriod = !log.period;
+    if (!nextPeriod && !log.flow && !log.pain && !log.mood && !log.note && !log.color && !log.time) {
+      delPeriodLog(date).then(() => renderPeriod());
+    } else {
+      savePeriodLog(date, { period: nextPeriod }).then(() => renderPeriod());
+    }
+  }
+  function autoSavePeriodField() {
+    const date = selectedPDate;
+    const log = periodLogs[date] || { date, period: false, flow: '', pain: 0, mood: '', note: '', color: '', time: '' };
+    const period = log.period;
     const flow = period ? $('#pFlow').value : '';
     const color = period ? $('#pColor').value : '';
     const pain = +$('#pPain').value;
@@ -835,14 +847,9 @@
     const note = $('#pNote').value.trim();
     if (!period && !flow && !pain && !mood && !note && !color && !time) {
       delPeriodLog(date).then(() => renderPeriod());
-      return;
+    } else {
+      savePeriodLog(date, { period, flow, color, pain, mood, time, note }).then(() => renderPeriod());
     }
-    savePeriodLog(date, { period, flow, color, pain, mood, time, note }).then(() => renderPeriod());
-  }
-  function setPeriodDay(yes) {
-    $('#pDayPeriodYes').classList.toggle('on', yes);
-    $('#pDayPeriodNo').classList.toggle('on', !yes);
-    $('#periodOnlyGroup').style.display = yes ? 'block' : 'none';
   }
 
   // ---------- init ----------
@@ -898,12 +905,11 @@
     $('#nextPMonth').addEventListener('click', () => { periodMonth = nextMonth(periodMonth); renderPeriod(); });
     $('#pCycle').addEventListener('change', (e) => { settings.period.cycle = Math.min(45, Math.max(21, +e.target.value || 28)); saveSettings(); renderPeriod(); });
     $('#pDur').addEventListener('change', (e) => { settings.period.duration = Math.min(15, Math.max(2, +e.target.value || 5)); saveSettings(); renderPeriod(); });
-    $('#pDayPeriodYes').addEventListener('click', () => setPeriodDay(true));
-    $('#pDayPeriodNo').addEventListener('click', () => setPeriodDay(false));
-    $('#pSaveDay').addEventListener('click', savePeriodDay);
-    $('#pClearDay').addEventListener('click', () => {
-      delPeriodLog(selectedPDate).then(() => renderPeriod());
+    $('#pDayPeriodYes').addEventListener('click', togglePeriodDay);
+    document.querySelectorAll('#periodPanel .p-auto-save').forEach(el => {
+      el.addEventListener('change', autoSavePeriodField);
     });
+    $('#pNote').addEventListener('blur', autoSavePeriodField);
   }
 
   function prevMonth(m) {

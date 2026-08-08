@@ -308,14 +308,14 @@
     .set-row input{width:100%;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px;font-size:15px;text-align:center;background:#fff;color:var(--text);}
     .set-row input:focus{outline:none;border-color:var(--blue);}
     /* 月历 */
-    .pc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;width:100%;}
+    .pc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;width:100%;align-items:start;}
     .pc-w{text-align:center;font-size:11px;color:var(--sub);padding:2px 0;min-width:0;}
     .pc-cell{
       position:relative; aspect-ratio:1/1; border-radius:12px; background:#f7f8fb; border:1px solid transparent;
       display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:var(--text);
       cursor:pointer; transition:var(--transition); user-select:none; min-width:0; overflow:hidden;
     }
-    .pc-cell.empty{background:transparent;cursor:default;}
+    .pc-cell.empty{background:transparent;cursor:default;aspect-ratio:auto;height:0;padding:0;border:none;}
     .pc-cell .pc-d{line-height:1;}
     .pc-cell .pc-dot{position:absolute; bottom:5px; font-size:8px; line-height:1;}
     /* 月经期：深粉底色白字 */
@@ -326,8 +326,11 @@
     .pc-cell.ovulation{background:#A855F7;color:#fff;}
     /* 易孕期：仅文字紫色 */
     .pc-cell.fertile-text{color:#A855F7;}
-    .pc-cell.today{box-shadow:0 0 0 2px #E11D48;}
+    /* 今天：玫红实心圆+白字，叠加外圈 */
+    .pc-cell.today{background:#E11D48;color:#fff;box-shadow:0 0 0 2px #fff,0 0 0 4px #E11D48;font-weight:800;}
+    .pc-cell.today.period{background:#E11D48;color:#fff;box-shadow:0 0 0 2px #fff,0 0 0 4px #E11D48;}
     .pc-cell.selected{box-shadow:0 0 0 2px var(--blue);}
+    .pc-cell.today.selected{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--blue);}
     .pc-cell.has{font-weight:800;}
     .pc-cell:not(.empty):active{transform:scale(.94);}
     .pc-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12px;color:var(--sub);}
@@ -469,17 +472,14 @@
           <span><i class="lg today"></i>今天</span>
         </div>
 
-        <!-- 当日记录面板（美柚式） -->
+        <!-- 当日记录面板 -->
         <div class="period-panel" id="periodPanel">
           <div class="pp-date"><span id="pDayTitle">2026-08-08</span><span class="tag" id="pDayTag">今天</span></div>
-          <div class="period-toggle">
-            <button id="pDayPeriodYes" class="on">🩸 月经来了</button>
-            <button id="pDayPeriodNo">未至</button>
-          </div>
+          <button class="period-entry-btn" id="pDayPeriodYes" style="width:100%;padding:16px;border-radius:var(--radius-md);font-size:17px;margin-bottom:16px;cursor:pointer;">🩸 月经来了</button>
           <div id="periodOnlyGroup">
             <div class="pp-row">
               <div class="pp-label"><i>🩸</i>流量</div>
-              <select id="pFlow">
+              <select id="pFlow" class="p-auto-save">
                 <option value="">不记</option>
                 <option value="spotting">点滴出血</option>
                 <option value="light">量少</option>
@@ -489,7 +489,7 @@
             </div>
             <div class="pp-row">
               <div class="pp-label"><i>🎨</i>颜色</div>
-              <select id="pColor">
+              <select id="pColor" class="p-auto-save">
                 <option value="">不记</option>
                 <option value="bright">鲜红</option>
                 <option value="dark">暗红</option>
@@ -500,7 +500,7 @@
           </div>
           <div class="pp-row">
             <div class="pp-label"><i>😣</i>痛经</div>
-            <select id="pPain">
+            <select id="pPain" class="p-auto-save">
               <option value="0">无</option>
               <option value="1">轻微</option>
               <option value="2">中度</option>
@@ -509,7 +509,7 @@
           </div>
           <div class="pp-row">
             <div class="pp-label"><i>😊</i>心情</div>
-            <select id="pMood">
+            <select id="pMood" class="p-auto-save">
               <option value="">不记</option>
               <option value="😊">😊 不错</option>
               <option value="😐">😐 一般</option>
@@ -521,15 +521,11 @@
           </div>
           <div class="pp-row">
             <div class="pp-label"><i>🕐</i>具体时间</div>
-            <input type="time" id="pTime">
+            <input type="time" id="pTime" class="p-auto-save">
           </div>
           <div class="pp-row">
             <div class="pp-label"><i>📝</i>备注</div>
-            <input type="text" id="pNote" placeholder="如：腰酸、喝了红糖水">
-          </div>
-          <div class="pp-actions">
-            <button class="save" id="pSaveDay">保存</button>
-            <button class="clear" id="pClearDay">清空</button>
+            <input type="text" id="pNote" class="p-auto-save" placeholder="如：腰酸、喝了红糖水">
           </div>
         </div>
       </div>
