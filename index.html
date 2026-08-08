@@ -307,12 +307,12 @@
     .set-row input{width:100%;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px;font-size:15px;text-align:center;background:#fff;color:var(--text);}
     .set-row input:focus{outline:none;border-color:var(--blue);}
     /* 月历 */
-    .pc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
-    .pc-w{text-align:center;font-size:11px;color:var(--sub);padding:2px 0;}
+    .pc-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;width:100%;}
+    .pc-w{text-align:center;font-size:11px;color:var(--sub);padding:2px 0;min-width:0;}
     .pc-cell{
       position:relative; aspect-ratio:1/1; border-radius:12px; background:#f7f8fb; border:1px solid transparent;
       display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:var(--text);
-      cursor:pointer; transition:var(--transition); user-select:none;
+      cursor:pointer; transition:var(--transition); user-select:none; min-width:0; overflow:hidden;
     }
     .pc-cell.empty{background:transparent;cursor:default;}
     .pc-cell .pc-d{line-height:1;}
