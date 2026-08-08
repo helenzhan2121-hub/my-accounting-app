@@ -278,7 +278,8 @@
 
     const maxVal = Math.max(1, ...Array.from({ length: days }, (_, i) => i + 1).map(i => Math.max(map[i].in, map[i].out)));
     const padL = 32, padR = 10, bottom = 22, top = 18, chartW = w - padL - padR, chartH = h - bottom - top;
-    const xOf = i => padL + chartW * ((i - 1) / Math.max(1, days - 1));
+    // X 轴按整月铺开，折线/数据只画到今天
+    const xOf = i => padL + chartW * ((i - 1) / Math.max(1, fullDays - 1));
     const yOf = v => top + chartH * (1 - v / maxVal);
 
     // grid + Y labels
@@ -289,9 +290,9 @@
       ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
       ctx.fillText(Math.round(maxVal * (1 - i / 4)).toString(), padL - 4, y + 3);
     }
-    // X labels
+    // X labels：始终显示整月关键刻度
     ctx.textAlign = 'center'; ctx.fillStyle = '#6b7280';
-    [1, 8, 15, 22, 29].forEach(d => { if (d <= days) ctx.fillText(d, xOf(d), h - 6); });
+    [1, 8, 15, 22, 29].forEach(d => { if (d <= fullDays) ctx.fillText(d, xOf(d), h - 6); });
 
     // 支出：画到今天的折线
     const drawLine = (key, color) => {
