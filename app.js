@@ -265,15 +265,18 @@
     const w = canvas.width / dpr, h = 200;
     ctx.clearRect(0, 0, w, h);
 
-    const days = daysInMonth(m);
+    const today = todayStr();
+    const isCurrent = m === today.slice(0, 7);
+    const days = isCurrent ? parseInt(today.slice(8), 10) : daysInMonth(m);
+    const fullDays = daysInMonth(m);
     const map = {};
-    for (let i = 1; i <= days; i++) map[i] = { in: 0, out: 0 };
+    for (let i = 1; i <= fullDays; i++) map[i] = { in: 0, out: 0 };
     records.filter(r => monthOf(r.date) === m).forEach(r => {
       const d = parseInt(r.date.slice(8), 10);
       if (map[d]) map[d][r.type] += +r.amt;
     });
 
-    const maxVal = Math.max(1, ...Object.values(map).map(v => Math.max(v.in, v.out)));
+    const maxVal = Math.max(1, ...Array.from({ length: days }, (_, i) => i + 1).map(i => Math.max(map[i].in, map[i].out)));
     const padL = 32, padR = 10, bottom = 22, top = 18, chartW = w - padL - padR, chartH = h - bottom - top;
     const xOf = i => padL + chartW * ((i - 1) / Math.max(1, days - 1));
     const yOf = v => top + chartH * (1 - v / maxVal);
@@ -286,11 +289,11 @@
       ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
       ctx.fillText(Math.round(maxVal * (1 - i / 4)).toString(), padL - 4, y + 3);
     }
-    // X labels: 1 / 8 / 15 / 22 / 29
+    // X labels
     ctx.textAlign = 'center'; ctx.fillStyle = '#6b7280';
     [1, 8, 15, 22, 29].forEach(d => { if (d <= days) ctx.fillText(d, xOf(d), h - 6); });
 
-    // line drawing helper
+    // 支出：画到今天的折线
     const drawLine = (key, color) => {
       const pts = [];
       for (let i = 1; i <= days; i++) pts.push([xOf(i), yOf(map[i][key])]);
@@ -301,7 +304,27 @@
       ctx.fillStyle = color;
       pts.forEach(p => { ctx.beginPath(); ctx.arc(p[0], p[1], 2, 0, Math.PI * 2); ctx.fill(); });
     };
-    drawLine('in', '#16a34a');
+
+    // 收入：只画有收入的点，分段连线（跳过 0 值）
+    const drawIncomeSegments = () => {
+      ctx.strokeStyle = '#16a34a'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+      let started = false;
+      for (let i = 1; i <= days; i++) {
+        const v = map[i].in;
+        if (v <= 0) {
+          if (started) { ctx.stroke(); started = false; }
+          continue;
+        }
+        const x = xOf(i), y = yOf(v);
+        if (!started) { ctx.beginPath(); ctx.moveTo(x, y); started = true; }
+        else { ctx.lineTo(x, y); }
+        ctx.fillStyle = '#16a34a';
+        ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
+      }
+      if (started) ctx.stroke();
+    };
+
+    drawIncomeSegments();
     drawLine('out', '#ef4444');
 
     // legend
@@ -316,9 +339,9 @@
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
     canvas.width = (rect.width || 300) * dpr;
-    canvas.height = 200 * dpr;
+    canvas.height = 230 * dpr;
     ctx.scale(dpr, dpr);
-    const w = canvas.width / dpr, h = 200;
+    const w = canvas.width / dpr, h = 230;
     ctx.clearRect(0, 0, w, h);
 
     const outRecs = records.filter(r => r.type === 'out' && monthOf(r.date) === m);
@@ -328,7 +351,7 @@
     outRecs.forEach(r => { map[r.cat] = (map[r.cat] || 0) + +r.amt; });
     const total = Object.values(map).reduce((a, b) => a + b, 0);
     const colors = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6'];
-    const cx = Math.min(w * 0.30, 92), cy = h / 2, r = Math.min(cx - 14, cy - 14);
+    const cx = w / 2, cy = 78, r = Math.min(cx - 22, cy - 18);
     let start = -Math.PI / 2;
     const legend = [];
     Object.entries(map).forEach(([cat, val], i) => {
@@ -342,14 +365,21 @@
     ctx.beginPath(); ctx.arc(cx, cy, r * 0.55, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill();
     ctx.fillStyle = '#1f2937'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('¥' + Math.round(total).toLocaleString(), cx, cy + 4);
 
-    // legend right: 分类名 + 金额·百分比
+    // legend below: 分两行，每行最多 4 项，紧凑水平排列
     ctx.textAlign = 'left';
-    const lx = cx + r + 18;
+    const perRow = 4;
+    const rows = Math.ceil(legend.length / perRow);
+    const itemW = (w - 24) / perRow;
+    const startY = cy + r + 22;
     legend.forEach((l, i) => {
-      const y = 24 + i * 24;
-      ctx.fillStyle = l.color; ctx.fillRect(lx, y - 9, 10, 10);
-      ctx.fillStyle = '#374151'; ctx.font = '12px sans-serif'; ctx.fillText(l.cat, lx + 16, y - 4);
-      ctx.fillStyle = '#9ca3af'; ctx.font = '11px sans-serif'; ctx.fillText('¥' + Math.round(l.val).toLocaleString() + ' · ' + l.pct.toFixed(1) + '%', lx + 16, y + 9);
+      const row = Math.floor(i / perRow);
+      const col = i % perRow;
+      const x = 12 + col * itemW + (itemW > 90 ? (itemW - 90) / 2 : 0);
+      const y = startY + row * 26;
+      const size = 8;
+      ctx.fillStyle = l.color; ctx.fillRect(x, y - size / 2, size, size);
+      ctx.fillStyle = '#374151'; ctx.font = '12px sans-serif'; ctx.fillText(l.cat, x + 12, y - 1);
+      ctx.fillStyle = '#9ca3af'; ctx.font = '11px sans-serif'; ctx.fillText(l.pct.toFixed(1) + '%', x + 12, y + 12);
     });
   }
 
