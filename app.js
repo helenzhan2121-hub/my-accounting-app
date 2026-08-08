@@ -84,7 +84,9 @@
   // ---------- utils ----------
   const fmt = (n) => '¥' + (Number(n) || 0).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtInt = (n) => '¥' + Math.round(Number(n) || 0).toLocaleString('zh-CN');
-  const todayStr = () => new Date().toISOString().slice(0, 10);
+  // 本地时区 YYYY-MM-DD（避免 toISOString 的 UTC 偏差，GMT+8 凌晨会算错日）
+  const ymd = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const todayStr = () => ymd(new Date());
   const todayStamp = () => { const d = new Date(); return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`; };
   function monthOf(d) { return (d || '').slice(0, 7); }
   function daysInMonth(m) { const [y, mo] = m.split('-').map(Number); return new Date(y, mo, 0).getDate(); }
@@ -671,7 +673,7 @@
     });
   }
   function diffDays(a, b) { const da = new Date(a), db = new Date(b); return Math.round((db - da) / 86400000); }
-  function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+  function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate() + n); return ymd(d); }
   // 从已标记经期推导「经期开始日」序列（连续 period 天视为同一段）
   function periodStarts() {
     const days = Object.keys(periodLogs).filter(d => periodLogs[d].period).sort();
@@ -915,13 +917,15 @@
 
   function prevMonth(m) {
     const [y, mo] = m.split('-').map(Number);
-    const d = new Date(y, mo - 2, 1);
-    return d.toISOString().slice(0, 7);
+    let ny = y, nmo = mo - 1;
+    if (nmo < 1) { nmo = 12; ny--; }
+    return `${ny}-${String(nmo).padStart(2, '0')}`;
   }
   function nextMonth(m) {
     const [y, mo] = m.split('-').map(Number);
-    const d = new Date(y, mo, 1);
-    return d.toISOString().slice(0, 7);
+    let ny = y, nmo = mo + 1;
+    if (nmo > 12) { nmo = 1; ny++; }
+    return `${ny}-${String(nmo).padStart(2, '0')}`;
   }
 
   (async function init() {
