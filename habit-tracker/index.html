@@ -20,7 +20,7 @@
     @font-face{ font-family:'Inter'; font-style:normal; font-weight:700; font-display:swap; src:url('Inter-700.woff2') format('woff2'); }
     @font-face{ font-family:'Inter'; font-style:normal; font-weight:800; font-display:swap; src:url('Inter-800.woff2') format('woff2'); }
     /* ============================================================
-       现代靛蓝设计系统（移动端适配版）— 习惯打卡定制
+       现代靛蓝设计系统（移动端适配版）— 习惯打卡 · 打卡范式
        ============================================================ */
     :root{
       --blue:#4F46E5;
@@ -49,7 +49,7 @@
     }
     .amount-number{ font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
 
-    /* ---------- 壁纸三模式 + 偶像可见模式 ---------- */
+    /* ---------- 壁纸三模式 + 卡片毛玻璃 ---------- */
     body.has-wallpaper{ --card:rgba(255,255,255,.38); }
     body.wp-mode-face{ background-size:cover !important; background-position:center top !important; background-repeat:no-repeat !important; }
     body.wp-mode-full{ background-size:contain !important; background-position:center top !important; background-repeat:no-repeat !important; }
@@ -80,7 +80,6 @@
     /* ---------- 视图 ---------- */
     .view{display:none; padding:0 16px 16px; padding-top:10px;}
     .view.active{display:block;}
-
     body.has-wallpaper .topbar,
     body.has-wallpaper .home-card,
     body.has-wallpaper .rec-item,
@@ -93,7 +92,6 @@
     body.has-wallpaper .topbar .skin-sub{ text-shadow:0 1px 6px rgba(0,0,0,.55); }
     body.has-wallpaper .home-card .t-title,
     body.has-wallpaper .home-card .t-sub,
-    body.has-wallpaper .home-card .cal-day.done .num,
     body.has-wallpaper .sec-title,
     body.has-wallpaper .stat-head,
     body.has-wallpaper .stat-cards .sc .k,
@@ -103,10 +101,11 @@
     body.has-wallpaper .habit-item .h-meta,
     body.has-wallpaper .empty{ text-shadow:0 1px 4px rgba(255,255,255,.92); }
 
-    /* ---------- 首页通用卡片 ---------- */
+    /* ---------- 通用卡片 ---------- */
     .home-card{background:var(--card);border-radius:var(--radius-lg);padding:22px 20px;box-shadow:var(--shadow-md);margin-bottom:16px;}
     .sec-title{display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:700;margin:18px 4px 10px;color:var(--text);}
     .sec-title .more{font-size:12px;font-weight:500;color:var(--sub);}
+    .sec-title .more.click{color:var(--blue);}
 
     /* 今日概览 */
     .today-overview{display:flex;flex-direction:column;gap:4px;}
@@ -115,33 +114,94 @@
     .today-overview .t-prog{margin-top:12px;height:8px;background:rgba(79,70,229,.1);border-radius:99px;overflow:hidden;}
     .today-overview .t-prog > i{display:block;height:100%;background:linear-gradient(90deg,var(--blue-l),var(--blue));border-radius:99px;transition:width .3s;}
 
-    /* 月历热力图 */
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:6px;}
-    .cal-grid .wd{font-size:11px;color:var(--sub);text-align:center;}
-    .cal-day{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;background:rgba(17,24,39,.05);color:var(--sub);position:relative;}
-    .cal-day.done{background:linear-gradient(135deg,var(--blue-l),var(--blue));color:#fff;box-shadow:var(--shadow-xs);}
-    .cal-day.today{outline:2px solid var(--blue);outline-offset:1px;}
-    .cal-day .dot{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;background:currentColor;opacity:.5;}
+    /* ---------- 热力图（月 / 年） ---------- */
+    .heat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:6px;}
+    .heat-grid.year{gap:3px;}
+    .heat-wd{font-size:10px;color:var(--sub);text-align:center;padding-bottom:2px;}
+    .heat-cell{aspect-ratio:1;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;position:relative;background:rgba(17,24,39,.05);color:var(--sub);}
+    .heat-grid.year .heat-cell{border-radius:4px;font-size:0;}
+    .heat-cell.rest{background:transparent;}
+    .heat-cell.miss{background:rgba(239,68,68,.14);color:#EF4444;}
+    .heat-cell.lv1{background:rgba(99,102,241,.28);color:#fff;}
+    .heat-cell.lv2{background:rgba(99,102,241,.5);color:#fff;}
+    .heat-cell.lv3{background:rgba(79,70,229,.8);color:#fff;}
+    .heat-cell.lv4{background:var(--blue);color:#fff;}
+    .heat-cell.over{background:var(--blue-d);color:#fff;}
+    .heat-cell.today{outline:2px solid var(--blue);outline-offset:1px;}
+    .heat-legend{display:flex;align-items:center;gap:5px;justify-content:flex-end;margin-top:10px;font-size:11px;color:var(--sub);}
+    .heat-legend i{width:12px;height:12px;border-radius:3px;display:inline-block;}
 
-    /* 习惯列表项 */
+    /* ---------- 完成率圆环 ---------- */
+    .ring-wrap{display:flex;align-items:center;gap:18px;}
+    .ring{position:relative;width:108px;height:108px;flex-shrink:0;}
+    .ring svg{transform:rotate(-90deg);}
+    .ring .ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+    .ring .ring-pct{font-size:26px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums;}
+    .ring .ring-cap{font-size:11px;color:var(--sub);}
+    .ring-side{flex:1;}
+    .ring-side .rs-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px;}
+    .ring-side .rs-row:last-child{border-bottom:none;}
+    .ring-side .rs-k{color:var(--sub);}
+    .ring-side .rs-v{font-weight:700;font-variant-numeric:tabular-nums;}
+
+    /* ---------- 周视图 ---------- */
+    .weekview{overflow-x:auto;}
+    .wv-row{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+    .wv-name{width:74px;flex-shrink:0;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px;}
+    .wv-name .we{font-size:15px;}
+    .wv-days{flex:1;display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+    .wv-cell{aspect-ratio:1;border-radius:8px;background:rgba(17,24,39,.05);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--sub);cursor:pointer;transition:var(--transition);}
+    .wv-cell.rest{background:transparent;cursor:default;}
+    .wv-cell.on{background:linear-gradient(135deg,var(--blue-l),var(--blue));color:#fff;box-shadow:var(--shadow-xs);}
+    .wv-cell.today{outline:2px solid var(--blue);outline-offset:1px;}
+    .wv-cell.disabled{opacity:.4;cursor:default;}
+    .wv-head{display:flex;gap:6px;margin-bottom:8px;}
+    .wv-head .wv-name{visibility:hidden;}
+    .wv-head .wv-days span{text-align:center;font-size:11px;color:var(--sub);font-weight:600;}
+
+    /* ---------- 习惯列表项 ---------- */
     .habit-item{background:var(--card);border-radius:var(--radius-lg);padding:14px 15px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow-sm);}
     .habit-item .emoji{width:46px;height:46px;border-radius:14px;background:rgba(79,70,229,.08);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;}
     .habit-item .mid{flex:1;min-width:0;}
     .habit-item .h-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .habit-item .h-meta{font-size:12px;color:var(--sub);margin-top:2px;}
+    .habit-item .h-meta{font-size:12px;color:var(--sub);margin-top:2px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    .freq-tag{font-size:11px;background:rgba(79,70,229,.1);color:var(--blue);padding:1px 7px;border-radius:99px;font-weight:600;}
+    .fire{font-weight:800;font-variant-numeric:tabular-nums;font-size:12px;}
+    .fire-lv1{color:#FDBA74;} .fire-lv2{color:#FB923C;} .fire-lv3{color:#F97316;}
+    .fire-lv4{color:#EA580C;} .fire-lv5{color:#A855F7;} .fire-lv6{color:#EAB308;}
+    /* 次数计数 */
+    .counter{display:flex;align-items:center;gap:4px;flex-shrink:0;}
+    .counter .cnt{font-size:13px;font-weight:700;color:var(--text);min-width:30px;text-align:center;font-variant-numeric:tabular-nums;}
+    .counter button{width:38px;height:38px;border-radius:50%;border:2px solid var(--line);background:#fff;color:var(--sub);font-size:18px;display:flex;align-items:center;justify-content:center;transition:var(--transition);}
+    .counter button.plus.on{background:linear-gradient(135deg,var(--blue-l),var(--blue));border-color:var(--blue);color:#fff;}
+    .counter button.minus{color:var(--sub);}
     .habit-item .check{width:42px;height:42px;border-radius:50%;border:2px solid var(--line);background:#fff;color:var(--sub);font-size:20px;flex-shrink:0;transition:var(--transition);display:flex;align-items:center;justify-content:center;}
     .habit-item .check.on{background:linear-gradient(135deg,var(--blue-l),var(--blue));border-color:var(--blue);color:#fff;}
 
-    /* ---------- 统计 ---------- */
+    /* ---------- 统计通用 ---------- */
     .stat-head{display:flex;align-items:center;justify-content:center;gap:14px;margin:4px 0 16px;color:var(--text);font-size:17px;font-weight:700;}
-    .stat-head button{background:var(--card);border:1px solid var(--line);color:var(--text);width:28px;height:28px;border-radius:50%;font-size:14px;box-shadow:var(--shadow-xs);}
     .stat-cards{display:flex;gap:10px;margin-bottom:16px;}
     .stat-cards .sc{flex:1;background:var(--card);border-radius:var(--radius-md);padding:14px 10px;text-align:center;box-shadow:var(--shadow-sm);}
     .stat-cards .sc .k{font-size:12px;color:var(--sub);}
     .stat-cards .sc .v{font-size:18px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums;}
     .chart-card{background:var(--card);border-radius:var(--radius-lg);padding:16px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
-    .chart-card h4{margin:0 0 12px;font-size:14px;color:var(--sub);font-weight:600;}
-    .chart-card canvas{width:100%;height:200px;}
+    .chart-card h4{margin:0 0 12px;font-size:14px;color:var(--sub);font-weight:600;display:flex;justify-content:space-between;align-items:center;}
+    .chart-card h4 .sub{font-size:12px;color:var(--sub);font-weight:500;}
+
+    /* 排行 / 火焰激励 */
+    .rank-item{display:flex;align-items:center;gap:12px;padding:11px 4px;border-bottom:1px solid var(--line);}
+    .rank-item:last-child{border-bottom:none;}
+    .rank-item .badge{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;background:rgba(79,70,229,.1);color:var(--blue);flex-shrink:0;}
+    .rank-item .ri-emoji{font-size:22px;}
+    .rank-item .ri-mid{flex:1;min-width:0;}
+    .rank-item .ri-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .rank-item .ri-meta{font-size:12px;color:var(--sub);margin-top:1px;}
+    .achv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:4px;}
+    .achv{text-align:center;padding:10px 4px;border-radius:12px;background:rgba(17,24,39,.04);}
+    .achv.on{background:linear-gradient(135deg,rgba(99,102,241,.16),rgba(79,70,229,.1));}
+    .achv .a-ico{font-size:22px;}
+    .achv .a-name{font-size:11px;color:var(--sub);margin-top:3px;}
+    .achv.on .a-name{color:var(--blue);font-weight:600;}
 
     /* ---------- 我的 ---------- */
     .mine-card{background:var(--card);border-radius:var(--radius-lg);padding:18px;margin-bottom:14px;box-shadow:var(--shadow-sm);}
@@ -159,6 +219,10 @@
     .wp-mode-row .hint{font-size:12px;color:var(--sub);margin-right:4px;}
     .wp-mode-row button{border:1px solid var(--line);background:var(--card);border-radius:var(--radius-pill);padding:6px 12px;font-size:12px;color:var(--text);transition:var(--transition);}
     .wp-mode-row button.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .mine-btn{width:100%;background:var(--card);border:1px solid var(--line);border-radius:var(--radius-md);padding:14px;font-size:14px;font-weight:600;color:var(--text);margin-top:10px;display:flex;justify-content:space-between;align-items:center;transition:var(--transition);}
+    .mine-btn:active{background:rgba(79,70,229,.05);}
+    .mine-btn .arrow{color:var(--sub);}
+    .reminder-status{font-size:12px;color:var(--sub);margin-left:auto;}
 
     /* ---------- 底部 Tab ---------- */
     .tabbar{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(env(safe-area-inset-bottom) + 8px); width:calc(100% - 28px); max-width:452px; z-index:50; background:var(--card); border-radius:24px; padding:9px 0; display:flex; justify-content:space-around; align-items:center; box-shadow:var(--shadow-md); border:1px solid var(--line);}
@@ -194,15 +258,25 @@
     .field-line label{display:block;font-size:12px;color:var(--sub);margin-bottom:5px;}
     .field-line input,.field-line select{width:100%;border:1px solid var(--line);border-radius:var(--radius-md);padding:12px;font-size:15px;background:#fff;color:var(--text);transition:var(--transition);}
     .field-line input:focus,.field-line select:focus{outline:none;border-color:var(--blue);box-shadow:var(--shadow-focus);}
+    .field-hint{font-size:11px;color:var(--sub);margin-top:4px;}
+
+    /* 频率选择 */
+    .seg{display:flex;gap:8px;margin-bottom:10px;}
+    .seg button{flex:1;border:1px solid var(--line);background:var(--card);border-radius:var(--radius-md);padding:11px 4px;font-size:13px;color:var(--text);transition:var(--transition);font-weight:600;}
+    .seg button.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+    .weekday-pick{display:flex;gap:6px;margin-bottom:10px;}
+    .weekday-pick button{flex:1;aspect-ratio:1;border:1px solid var(--line);background:var(--card);border-radius:10px;font-size:13px;color:var(--sub);transition:var(--transition);}
+    .weekday-pick button.on{background:var(--blue);color:#fff;border-color:var(--blue);}
+
     .btn-primary{width:100%;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-md);padding:16px;font-size:17px;font-weight:700;margin-top:6px;}
     .btn-danger{color:var(--out);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04);}
-
     .empty{text-align:center;color:var(--sub);padding:70px 20px;font-size:14px;}
 
     /* 习惯管理列表项 */
     .cat-mgr-item{display:flex;align-items:center;gap:10px;background:#f7f8fb;border-radius:12px;padding:10px 12px;margin-bottom:8px;}
     .cat-mgr-item .e{font-size:22px;width:34px;text-align:center;}
-    .cat-mgr-item .n{flex:1;font-size:14px;font-weight:600;}
+    .cat-mgr-item .n{flex:1;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .cat-mgr-item .freq{font-size:11px;color:var(--sub);margin-left:6px;}
     .cat-mgr-item .ops{display:flex;gap:6px;}
     .cat-mgr-item .ops button{border:none;background:#fff;border-radius:8px;width:34px;height:34px;font-size:15px;box-shadow:var(--shadow-xs);}
   </style>

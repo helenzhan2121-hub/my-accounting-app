@@ -4,6 +4,7 @@
   const APP_NAME = '对账本';
   const DB_NAME = 'duizhangben_db';
   const STORE = 'records';
+  const PERIOD_STORE = 'period_logs';
   const $ = (s) => document.querySelector(s);
 
   // ---------- 分类（预置清单，用户可自定义增删改） ----------
@@ -36,19 +37,23 @@
     { key: 'teal',   name: '青绿',   color: '#0D9488', bg: '#ECFDF9', top: 'linear-gradient(135deg,#14B8A6 0%,#0D9488 100%)', icon: '🟢' },
     { key: 'amber',  name: '琥珀',   color: '#D97706', bg: '#FFFBEB', top: 'linear-gradient(135deg,#F59E0B 0%,#D97706 100%)', icon: '🟠' },
     { key: 'rose',   name: '玫红',   color: '#E11D48', bg: '#FFF1F3', top: 'linear-gradient(135deg,#F43F5E 0%,#E11D48 100%)', icon: '🌹' },
-    { key: 'violet', name: '紫罗兰', color: '#7C3AED', bg: '#F5F3FF', top: 'linear-gradient(135deg,#8B5CF6 0%,#7C3AED 100%)', icon: '🔮' }
+    { key: 'violet', name: '紫罗兰', color: '#7C3AED', bg: '#F5F3FF', top: 'linear-gradient(135deg,#8B5CF6 0%,#7C3AED 100%)', icon: '🔮' },
+    { key: 'pink',   name: '粉色',   color: '#EC4899', bg: '#FDF2F8', top: 'linear-gradient(135deg,#F472B6 0%,#EC4899 100%)', light: '#F472B6', icon: '🌸' }
   ];
 
   // ---------- IndexedDB ----------
   let db;
   function openDB() {
     return new Promise((resolve, reject) => {
-      const req = indexedDB.open(DB_NAME, 1);
+      const req = indexedDB.open(DB_NAME, 2);
       req.onupgradeneeded = (e) => {
         const d = e.target.result;
         if (!d.objectStoreNames.contains(STORE)) {
           const s = d.createObjectStore(STORE, { keyPath: 'id' });
           s.createIndex('date', 'date');
+        }
+        if (!d.objectStoreNames.contains(PERIOD_STORE)) {
+          d.createObjectStore(PERIOD_STORE, { keyPath: 'date' });
         }
       };
       req.onsuccess = (e) => { db = e.target.result; resolve(db); };
@@ -107,6 +112,7 @@
     }
     CATS = settings.cats;
     curCat = CATS[curType][0];
+    ensurePeriodSettings();
   }
   function saveSettings() { localStorage.setItem('dz_settings', JSON.stringify(settings)); }
 
@@ -118,6 +124,7 @@
     if (name === 'stats') renderStats();
     if (name === 'home') renderHome();
     if (name === 'detail') renderDetail();
+    if (name === 'period') renderPeriod();
   }
 
   // ---------- 汇总计算 ----------
@@ -243,11 +250,11 @@
     $('#statIn').textContent = fmtInt(c.ins);
     $('#statOut').textContent = fmtInt(c.out);
     $('#statBal').textContent = fmtInt(c.bal);
-    drawBarChart(currentMonth);
+    drawTrendChart(currentMonth);
     drawPieChart(currentMonth);
   }
 
-  function drawBarChart(m) {
+  function drawTrendChart(m) {
     const canvas = $('#barChart');
     const ctx = canvas.getContext('2d');
     const dpr = window.devicePixelRatio || 1;
@@ -267,34 +274,40 @@
     });
 
     const maxVal = Math.max(1, ...Object.values(map).map(v => Math.max(v.in, v.out)));
-    const pad = 26, bottom = 28, top = 16, chartH = h - bottom - top;
-    const barW = (w - pad * 2) / days * 0.55;
-    const step = (w - pad * 2) / days;
+    const padL = 32, padR = 10, bottom = 22, top = 18, chartW = w - padL - padR, chartH = h - bottom - top;
+    const xOf = i => padL + chartW * ((i - 1) / Math.max(1, days - 1));
+    const yOf = v => top + chartH * (1 - v / maxVal);
 
-    // grid
+    // grid + Y labels
     ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1;
+    ctx.fillStyle = '#9ca3af'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
     for (let i = 0; i <= 4; i++) {
       const y = top + chartH * (i / 4);
-      ctx.beginPath(); ctx.moveTo(pad, y); ctx.lineTo(w - pad, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(w - padR, y); ctx.stroke();
+      ctx.fillText(Math.round(maxVal * (1 - i / 4)).toString(), padL - 4, y + 3);
     }
-    // bars
-    Object.keys(map).forEach((d, i) => {
-      const x = pad + i * step + (step - barW) / 2;
-      const vIn = map[d].in, vOut = map[d].out;
-      const hIn = (vIn / maxVal) * chartH, hOut = (vOut / maxVal) * chartH;
-      const base = top + chartH;
-      if (vOut > 0) { ctx.fillStyle = '#ef4444'; ctx.fillRect(x, base - hOut, barW / 2, hOut); }
-      if (vIn > 0) { ctx.fillStyle = '#16a34a'; ctx.fillRect(x + barW / 2, base - hIn, barW / 2, hIn); }
-      // X 轴刻度：每 7 天标一次（1/8/15/22/29），数据仍是每日粒度
-      if ((i === 0) || (i + 1) % 7 === 0 || i === days - 1) {
-        ctx.fillStyle = '#6b7280'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(d, x + barW / 2, h - 8);
-      }
-    });
+    // X labels: 1 / 8 / 15 / 22 / 29
+    ctx.textAlign = 'center'; ctx.fillStyle = '#6b7280';
+    [1, 8, 15, 22, 29].forEach(d => { if (d <= days) ctx.fillText(d, xOf(d), h - 6); });
+
+    // line drawing helper
+    const drawLine = (key, color) => {
+      const pts = [];
+      for (let i = 1; i <= days; i++) pts.push([xOf(i), yOf(map[i][key])]);
+      ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      pts.forEach((p, idx) => idx === 0 ? ctx.moveTo(p[0], p[1]) : ctx.lineTo(p[0], p[1]));
+      ctx.stroke();
+      ctx.fillStyle = color;
+      pts.forEach(p => { ctx.beginPath(); ctx.arc(p[0], p[1], 2, 0, Math.PI * 2); ctx.fill(); });
+    };
+    drawLine('in', '#16a34a');
+    drawLine('out', '#ef4444');
+
     // legend
-    ctx.font = '11px sans-serif';
-    ctx.fillStyle = '#16a34a'; ctx.fillRect(w - 78, 6, 10, 10); ctx.fillStyle = '#374151'; ctx.fillText('收入', w - 62, 15);
-    ctx.fillStyle = '#ef4444'; ctx.fillRect(w - 38, 6, 10, 10); ctx.fillStyle = '#374151'; ctx.fillText('支出', w - 22, 15);
+    ctx.font = '11px sans-serif'; ctx.textAlign = 'left';
+    ctx.fillStyle = '#16a34a'; ctx.fillRect(w - 76, 6, 10, 10); ctx.fillStyle = '#374151'; ctx.fillText('收入', w - 60, 15);
+    ctx.fillStyle = '#ef4444'; ctx.fillRect(w - 36, 6, 10, 10); ctx.fillStyle = '#374151'; ctx.fillText('支出', w - 20, 15);
   }
 
   function drawPieChart(m) {
@@ -315,7 +328,7 @@
     outRecs.forEach(r => { map[r.cat] = (map[r.cat] || 0) + +r.amt; });
     const total = Object.values(map).reduce((a, b) => a + b, 0);
     const colors = ['#4F46E5', '#0EA5E9', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#14B8A6'];
-    const cx = w / 2 - 40, cy = h / 2, r = Math.min(cx, cy) - 12;
+    const cx = Math.min(w * 0.30, 92), cy = h / 2, r = Math.min(cx - 14, cy - 14);
     let start = -Math.PI / 2;
     const legend = [];
     Object.entries(map).forEach(([cat, val], i) => {
@@ -323,18 +336,20 @@
       ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, start, start + ang); ctx.closePath();
       ctx.fillStyle = colors[i % colors.length]; ctx.fill();
       start += ang;
-      legend.push({ cat, val, color: colors[i % colors.length] });
+      legend.push({ cat, val, pct: (val / total) * 100, color: colors[i % colors.length] });
     });
     // donut hole
     ctx.beginPath(); ctx.arc(cx, cy, r * 0.55, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,.85)'; ctx.fill();
-    ctx.fillStyle = '#1f2937'; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('¥' + Math.round(total).toLocaleString(), cx, cy + 4);
+    ctx.fillStyle = '#1f2937'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('¥' + Math.round(total).toLocaleString(), cx, cy + 4);
 
-    // legend right
+    // legend right: 分类名 + 金额·百分比
     ctx.textAlign = 'left';
+    const lx = cx + r + 18;
     legend.forEach((l, i) => {
-      const y = 30 + i * 22;
-      ctx.fillStyle = l.color; ctx.fillRect(cx + r + 24, y - 8, 10, 10);
-      ctx.fillStyle = '#374151'; ctx.font = '12px sans-serif'; ctx.fillText(l.cat, cx + r + 40, y);
+      const y = 24 + i * 24;
+      ctx.fillStyle = l.color; ctx.fillRect(lx, y - 9, 10, 10);
+      ctx.fillStyle = '#374151'; ctx.font = '12px sans-serif'; ctx.fillText(l.cat, lx + 16, y - 4);
+      ctx.fillStyle = '#9ca3af'; ctx.font = '11px sans-serif'; ctx.fillText('¥' + Math.round(l.val).toLocaleString() + ' · ' + l.pct.toFixed(1) + '%', lx + 16, y + 9);
     });
   }
 
@@ -401,6 +416,7 @@
     const root = document.documentElement;
     root.style.setProperty('--blue', t.color);
     root.style.setProperty('--blue-d', t.color);
+    root.style.setProperty('--blue-l', t.light || '#6366F1');
     root.style.setProperty('--bg', t.bg);
     root.style.setProperty('--topbar-bg', t.top);
     root.style.setProperty('--text', '#1f2937');
@@ -552,8 +568,8 @@
     YJXLSX.exportObjects(objs, '对账记录', fname);
   }
   function backup() {
-    if (!records.length) { alert('暂无数据可备份'); return; }
-    const blob = new Blob([JSON.stringify({ app: APP_NAME, version: 1, exportAt: new Date().toISOString(), records }, null, 2)], { type: 'application/json' });
+    if (!records.length && !Object.keys(periodLogs).length) { alert('暂无数据可备份'); return; }
+    const blob = new Blob([JSON.stringify({ app: APP_NAME, version: 1, exportAt: new Date().toISOString(), records, periodLogs: Object.values(periodLogs) }, null, 2)], { type: 'application/json' });
     YJXLSX.triggerDownload(blob, `${APP_NAME}_备份_${todayStamp()}.json`);
   }
   function restore(file) {
@@ -564,7 +580,12 @@
         const recs = Array.isArray(data) ? data : data.records;
         if (!Array.isArray(recs)) throw new Error('格式不正确');
         for (const r of recs) { if (!r.id) r.id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6); await put(r); }
-        await load(); alert(`已导入 ${recs.length} 条记录`);
+        const plogs = Array.isArray(data) ? null : (data.periodLogs || []);
+        if (plogs && plogs.length) {
+          await loadPeriodLogs();
+          for (const p of plogs) { await savePeriodLog(p.date, p); }
+        }
+        await load(); alert(`已导入 ${recs.length} 条记账${plogs && plogs.length ? '、' + plogs.length + ' 条经期记录' : ''}`);
       } catch (e) { alert('导入失败：' + e.message); }
     };
     reader.readAsText(file);
@@ -586,9 +607,218 @@
     Promise.all(records.map(r => del(r.id))).then(load);
   }
 
+  // ================= 经期模块（参考美柚，基础版） =================
+  let periodLogs = {}; // { 'YYYY-MM-DD': {date, period, flow, pain, mood, note} }
+  function ensurePeriodSettings() {
+    if (!settings.period) settings.period = {};
+    if (!settings.period.cycle) settings.period.cycle = 28;
+    if (!settings.period.duration) settings.period.duration = 5;
+    if (settings.period.lastStart === undefined) settings.period.lastStart = '';
+  }
+  function periodTx(mode) { return db.transaction(PERIOD_STORE, mode).objectStore(PERIOD_STORE); }
+  function loadPeriodLogs() {
+    return new Promise((res, rej) => {
+      const r = periodTx('readonly').getAll();
+      r.onsuccess = () => { const arr = r.result || []; periodLogs = {}; arr.forEach(x => { periodLogs[x.date] = x; }); res(periodLogs); };
+      r.onerror = () => rej(r.error);
+    });
+  }
+  function savePeriodLog(date, patch) {
+    return new Promise((res, rej) => {
+      const cur = periodLogs[date] || { date, period: false, flow: '', pain: 0, mood: '', note: '' };
+      const next = Object.assign({}, cur, patch, { date });
+      periodLogs[date] = next;
+      const r = periodTx('readwrite').put(next);
+      r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+    });
+  }
+  function delPeriodLog(date) {
+    return new Promise((res, rej) => {
+      delete periodLogs[date];
+      const r = periodTx('readwrite').delete(date);
+      r.onsuccess = () => res(); r.onerror = () => rej(r.error);
+    });
+  }
+  function diffDays(a, b) { const da = new Date(a), db = new Date(b); return Math.round((db - da) / 86400000); }
+  function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+  // 从已标记经期推导「经期开始日」序列（连续 period 天视为同一段）
+  function periodStarts() {
+    const days = Object.keys(periodLogs).filter(d => periodLogs[d].period).sort();
+    const starts = []; let prev = null;
+    days.forEach(d => {
+      if (!prev || diffDays(prev, d) > (settings.period.duration || 5)) starts.push(d);
+      prev = d;
+    });
+    return starts;
+  }
+  // 平均周期：有≥2个开始日用实测，否则用设置
+  function avgCycle() {
+    const starts = periodStarts();
+    if (starts.length >= 2) {
+      let sum = 0;
+      for (let i = 1; i < starts.length; i++) sum += diffDays(starts[i - 1], starts[i]);
+      return Math.max(21, Math.min(45, Math.round(sum / (starts.length - 1))));
+    }
+    return settings.period.cycle || 28;
+  }
+  // 预测经期区间 + 排卵期 + 易孕期（标准：经期前14天排卵，易孕窗=排卵日前5至后1天）
+  function predict() {
+    const cycle = avgCycle();
+    const dur = settings.period.duration || 5;
+    const starts = periodStarts();
+    const base = starts.length ? starts[starts.length - 1] : (settings.period.lastStart || '');
+    const periodSet = new Set(), predictSet = new Set(), fertileSet = new Set(), ovulationSet = new Set();
+    let nextStart = '';
+    if (base) {
+      const today = todayStr();
+      // 1. 收集所有周期开始日：历史回推 + 未来预测
+      const allStarts = new Set();
+      let cur = base, guard = 0;
+      while (guard < 12) { allStarts.add(cur); cur = addDays(cur, -cycle); guard++; }
+      nextStart = base;
+      while (diffDays(nextStart, today) >= 0) nextStart = addDays(nextStart, cycle);
+      let fc = nextStart, fg = 0;
+      while (diffDays(fc, today) < 150 && fg < 12) { allStarts.add(fc); fc = addDays(fc, cycle); fg++; }
+      // 2. 区分实测经期（深粉）和预测经期（浅粉）
+      allStarts.forEach(st => {
+        const end = addDays(st, dur - 1);
+        const isCurrent = diffDays(st, today) >= 0 && diffDays(end, today) <= 0;
+        const isPast = diffDays(end, today) > 0;
+        const target = (isCurrent || isPast) ? periodSet : predictSet;
+        for (let i = 0; i < dur; i++) target.add(addDays(st, i));
+      });
+      // 3. 排卵日 & 易孕期
+      allStarts.forEach(st => {
+        const ov = addDays(st, -14);
+        ovulationSet.add(ov);
+        for (let i = -5; i <= 1; i++) fertileSet.add(addDays(ov, i));
+      });
+    }
+    return { periodSet, predictSet, fertileSet, ovulationSet, nextStart, base, cycle, dur };
+  }
+  let periodMonth = monthOf(todayStr());
+  let selectedPDate = todayStr();
+  function renderPeriod() {
+    ensurePeriodSettings();
+    const { periodSet, predictSet, fertileSet, ovulationSet, nextStart } = predict();
+    const today = todayStr();
+    let phase = '', phaseSub = '';
+    if (periodSet.has(today)) {
+      let d = today, n = 0;
+      while (periodLogs[d] && periodLogs[d].period) { n++; d = addDays(d, -1); }
+      phase = '🌸 经期第 ' + n + ' 天';
+      phaseSub = '好好照顾自己';
+    } else if (predictSet.has(today)) {
+      phase = '📅 预测经期中';
+      phaseSub = '可能快来了，注意身体变化';
+    } else if (nextStart) {
+      const left = diffDays(today, nextStart);
+      if (left > 0) { phase = '距离下次经期还有 ' + left + ' 天'; phaseSub = fertileSet.has(today) ? '当前处于易孕期' : ''; }
+      else if (fertileSet.has(today)) { phase = '🌟 易孕期'; phaseSub = '注意身体变化'; }
+      else { phase = '常规期'; phaseSub = ''; }
+    } else {
+      phase = '尚未设置经期记录'; phaseSub = '点日历标记第一天，或调整上方周期长度';
+    }
+    $('#periodPhase').textContent = phase;
+    $('#periodPhaseSub').textContent = phaseSub;
+    $('#pCycle').value = settings.period.cycle || 28;
+    $('#pDur').value = settings.period.duration || 5;
+    $('#periodMonth').textContent = periodMonth.replace('-', '年') + '月';
+    renderPeriodCalendar(periodSet, predictSet, fertileSet, ovulationSet, today);
+    renderPeriodPanel(selectedPDate);
+    let tag = '';
+    if (selectedPDate === today) tag = '今天';
+    else if (periodSet.has(selectedPDate)) tag = '经期';
+    else if (predictSet.has(selectedPDate)) tag = '预测经期';
+    else if (ovulationSet.has(selectedPDate)) tag = '排卵日';
+    else if (fertileSet.has(selectedPDate)) tag = '易孕期';
+    $('#pDayTag').textContent = tag;
+    $('#pDayTag').style.display = tag ? 'inline-block' : 'none';
+  }
+  function renderPeriodCalendar(periodSet, predictSet, fertileSet, ovulationSet, today) {
+    const y = +periodMonth.slice(0, 4), m = +periodMonth.slice(5, 7);
+    const first = new Date(y, m - 1, 1).getDay();
+    const dim = new Date(y, m, 0).getDate();
+    const wnames = ['日', '一', '二', '三', '四', '五', '六'];
+    const cells = [wnames.map(w => `<div class="pc-w">${w}</div>`).join('')];
+    for (let i = 0; i < first; i++) cells.push('<div class="pc-cell empty"></div>');
+    for (let d = 1; d <= dim; d++) {
+      const date = `${periodMonth}-${String(d).padStart(2, '0')}`;
+      const log = periodLogs[date];
+      let cls = 'pc-cell';
+      const userPeriod = log && log.period === true;
+      const userNotPeriod = log && log.period === false;
+      const inPeriod = (userPeriod || periodSet.has(date)) && !userNotPeriod;
+      const inPredict = predictSet.has(date) && !inPeriod;
+      const inFertile = fertileSet.has(date);
+      const isOvulation = ovulationSet.has(date);
+      if (inPeriod) cls += ' period';
+      else if (inPredict) cls += ' predict';
+      else if (isOvulation) cls += ' ovulation';
+      else if (inFertile) cls += ' fertile-text';
+      if (date === today) cls += ' today';
+      if (date === selectedPDate) cls += ' selected';
+      const hasRecord = log && (log.period || log.flow || log.pain || log.mood || log.note || log.color || log.time);
+      if (hasRecord) cls += ' has';
+      let tag = '';
+      if (isOvulation) tag = '💧';
+      else if (log && log.period) tag = (log.flow === 'heavy' || !log.flow || log.flow === 'normal') ? '🔴' : (log.flow === 'light' ? '🟡' : '🔹');
+      else if (log && (log.pain || log.mood)) tag = '•';
+      cells.push(`<div class="${cls}" data-date="${date}"><span class="pc-d">${d}</span>${tag ? `<span class="pc-dot">${tag}</span>` : ''}</div>`);
+    }
+    $('#periodGrid').innerHTML = cells.join('');
+    $('#periodGrid').querySelectorAll('.pc-cell[data-date]').forEach(el => {
+      el.addEventListener('click', () => selectPeriodDay(el.dataset.date));
+    });
+  }
+  function selectPeriodDay(date) {
+    selectedPDate = date;
+    renderPeriodCalendar(...lastCalendarArgs());
+    renderPeriodPanel(date);
+  }
+  function lastCalendarArgs() {
+    const { periodSet, predictSet, fertileSet, ovulationSet } = predict();
+    return [periodSet, predictSet, fertileSet, ovulationSet, todayStr()];
+  }
+  function renderPeriodPanel(date) {
+    const log = periodLogs[date] || { date, period: false, flow: '', pain: 0, mood: '', note: '', color: '', time: '' };
+    $('#pDayTitle').textContent = date;
+    $('#pDayPeriodYes').classList.toggle('on', !!log.period);
+    $('#pDayPeriodNo').classList.toggle('on', !log.period);
+    $('#pFlow').value = log.flow || '';
+    $('#pColor').value = log.color || '';
+    $('#pPain').value = log.pain || 0;
+    $('#pMood').value = log.mood || '';
+    $('#pTime').value = log.time || '';
+    $('#pNote').value = log.note || '';
+    const isPeriod = !!log.period;
+    $('#periodOnlyGroup').style.display = isPeriod ? 'block' : 'none';
+  }
+  function savePeriodDay() {
+    const date = $('#pDayTitle').textContent;
+    const period = $('#pDayPeriodYes').classList.contains('on');
+    const flow = period ? $('#pFlow').value : '';
+    const color = period ? $('#pColor').value : '';
+    const pain = +$('#pPain').value;
+    const mood = $('#pMood').value;
+    const time = $('#pTime').value;
+    const note = $('#pNote').value.trim();
+    if (!period && !flow && !pain && !mood && !note && !color && !time) {
+      delPeriodLog(date).then(() => renderPeriod());
+      return;
+    }
+    savePeriodLog(date, { period, flow, color, pain, mood, time, note }).then(() => renderPeriod());
+  }
+  function setPeriodDay(yes) {
+    $('#pDayPeriodYes').classList.toggle('on', yes);
+    $('#pDayPeriodNo').classList.toggle('on', !yes);
+    $('#periodOnlyGroup').style.display = yes ? 'block' : 'none';
+  }
+
   // ---------- init ----------
   async function load() {
     records = await getAll();
+    try { await loadPeriodLogs(); } catch (e) {}
     renderHome();
     renderDetail();
     if ($('#viewStats').classList.contains('active')) renderStats();
@@ -631,6 +861,19 @@
     $('#emojiPickerMask').addEventListener('click', (e) => { if (e.target.id === 'emojiPickerMask') $('#emojiPickerMask').classList.remove('show'); });
     $('#catEditMask').addEventListener('click', (e) => { if (e.target.id === 'catEditMask') closeCatEdit(); });
     window.addEventListener('resize', () => { if ($('#viewStats').classList.contains('active')) renderStats(); });
+    // 经期模块
+    $('#periodEntry').addEventListener('click', () => { selectedPDate = todayStr(); switchView('period'); });
+    $('#periodBack').addEventListener('click', () => switchView('mine'));
+    $('#prevPMonth').addEventListener('click', () => { periodMonth = prevMonth(periodMonth); renderPeriod(); });
+    $('#nextPMonth').addEventListener('click', () => { periodMonth = nextMonth(periodMonth); renderPeriod(); });
+    $('#pCycle').addEventListener('change', (e) => { settings.period.cycle = Math.min(45, Math.max(21, +e.target.value || 28)); saveSettings(); renderPeriod(); });
+    $('#pDur').addEventListener('change', (e) => { settings.period.duration = Math.min(15, Math.max(2, +e.target.value || 5)); saveSettings(); renderPeriod(); });
+    $('#pDayPeriodYes').addEventListener('click', () => setPeriodDay(true));
+    $('#pDayPeriodNo').addEventListener('click', () => setPeriodDay(false));
+    $('#pSaveDay').addEventListener('click', savePeriodDay);
+    $('#pClearDay').addEventListener('click', () => {
+      delPeriodLog(selectedPDate).then(() => renderPeriod());
+    });
   }
 
   function prevMonth(m) {

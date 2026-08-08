@@ -288,6 +288,74 @@
     .action-btn:active{background:#f1f3f8;}
     .action-btn.primary{background:var(--blue);color:#fff;border-color:var(--blue);}
     .action-btn.danger{color:var(--out);border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04);}
+
+    /* ---------- 经期模块（参考美柚，玫红系） ---------- */
+    .period-hero{
+      position:relative;
+      background:linear-gradient(135deg,#F43F5E 0%,#E11D48 100%);
+      color:#fff; border-radius:var(--radius-lg); padding:20px 20px 22px; margin-bottom:16px;
+      box-shadow:var(--shadow-md);
+    }
+    .period-hero .period-back{
+      position:absolute; top:14px; left:14px; border:none; background:rgba(255,255,255,.22); color:#fff;
+      border-radius:var(--radius-pill); padding:6px 14px; font-size:13px; font-weight:600; cursor:pointer;
+    }
+    .period-hero .ph-phase{font-size:22px;font-weight:800;margin-top:18px;text-shadow:0 1px 4px rgba(0,0,0,.18);}
+    .period-hero .ph-sub{font-size:13px;opacity:.92;margin-top:6px;}
+    .set-row{display:flex;gap:12px;}
+    .set-row label{flex:1;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--sub);}
+    .set-row input{width:100%;border:1px solid var(--line);border-radius:var(--radius-md);padding:10px;font-size:15px;text-align:center;background:#fff;color:var(--text);}
+    .set-row input:focus{outline:none;border-color:var(--blue);}
+    /* 月历 */
+    .pc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+    .pc-w{text-align:center;font-size:11px;color:var(--sub);padding:2px 0;}
+    .pc-cell{
+      position:relative; aspect-ratio:1/1; border-radius:12px; background:#f7f8fb; border:1px solid transparent;
+      display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:600; color:var(--text);
+      cursor:pointer; transition:var(--transition); user-select:none;
+    }
+    .pc-cell.empty{background:transparent;cursor:default;}
+    .pc-cell .pc-d{line-height:1;}
+    .pc-cell .pc-dot{position:absolute; bottom:5px; font-size:8px; line-height:1;}
+    /* 月经期：深粉底色白字 */
+    .pc-cell.period{background:#F43F5E;color:#fff;}
+    /* 预测经期：浅粉底色白字 */
+    .pc-cell.predict{background:#FBCFE8;color:#E11D48;}
+    /* 排卵日：紫色背景白字 */
+    .pc-cell.ovulation{background:#A855F7;color:#fff;}
+    /* 易孕期：仅文字紫色 */
+    .pc-cell.fertile-text{color:#A855F7;}
+    .pc-cell.today{box-shadow:0 0 0 2px #E11D48;}
+    .pc-cell.selected{box-shadow:0 0 0 2px var(--blue);}
+    .pc-cell.has{font-weight:800;}
+    .pc-cell:not(.empty):active{transform:scale(.94);}
+    .pc-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;font-size:12px;color:var(--sub);}
+    .pc-legend i.lg{display:inline-block;width:12px;height:12px;border-radius:4px;vertical-align:-2px;margin-right:4px;}
+    .pc-legend i.lg.period{background:#F43F5E;}
+    .pc-legend i.lg.predict{background:#FBCFE8;border:1px solid rgba(244,63,94,.2);}
+    .pc-legend i.lg.ovulation{background:#A855F7;}
+    .pc-legend i.lg.fertile-text{background:#F3E8FF;}
+    .pc-legend i.lg.today{box-shadow:0 0 0 2px #E11D48;}
+    .pc-legend i.lg.has{background:var(--blue);}
+    .hint-card{font-size:13px;color:var(--sub);line-height:1.6;background:rgba(244,63,94,.05);}
+    .period-entry-btn{background:linear-gradient(135deg,#F43F5E,#E11D48);color:#fff;border:none;font-weight:700;}
+    /* 经期日记录面板（美柚式：日历下方展开） */
+    .period-panel{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
+    .pp-date{font-size:15px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+    .pp-date .tag{font-size:11px;font-weight:600;color:#E11D48;background:rgba(244,63,94,.08);padding:3px 8px;border-radius:var(--radius-pill);}
+    .period-toggle{display:flex;gap:10px;margin-bottom:16px;}
+    .period-toggle button{flex:1;padding:12px;border-radius:var(--radius-md);border:1px solid var(--line);background:#fff;font-size:15px;font-weight:600;color:var(--text);cursor:pointer;}
+    .period-toggle button.on{background:#F43F5E;color:#fff;border-color:#F43F5E;}
+    .pp-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);}
+    .pp-row:last-child{border-bottom:none;}
+    .pp-row .pp-label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--text);}
+    .pp-row .pp-label i{font-style:normal;font-size:18px;}
+    .pp-row select,.pp-row input[type=time],.pp-row input[type=text]{border:1px solid var(--line);border-radius:var(--radius-md);padding:9px 10px;font-size:14px;background:#fff;color:var(--text);min-width:130px;text-align:right;}
+    .pp-row select:focus,.pp-row input:focus{outline:none;border-color:var(--blue);}
+    .pp-actions{display:flex;gap:10px;margin-top:18px;}
+    .pp-actions button{flex:1;padding:13px;border-radius:var(--radius-md);border:none;font-size:15px;font-weight:700;cursor:pointer;}
+    .pp-actions .save{background:linear-gradient(135deg,#F43F5E,#E11D48);color:#fff;}
+    .pp-actions .clear{background:#f7f8fb;color:var(--sub);border:1px solid var(--line);}
   </style>
 </head>
 <body>
@@ -370,6 +438,101 @@
         <button class="action-btn" id="sampleBtn">加载示例数据</button>
         <button class="action-btn danger" id="clearBtn">清空全部数据</button>
       </div>
+      <div class="mine-card">
+        <h4>🌸 经期记录</h4>
+        <button class="action-btn period-entry-btn" id="periodEntry">进入经期记录 ›</button>
+      </div>
+    </div>
+
+    <!-- 经期模块 -->
+    <div class="view" id="viewPeriod">
+      <div class="period-hero">
+        <button class="period-back" id="periodBack">‹ 返回</button>
+        <div class="ph-phase" id="periodPhase">—</div>
+        <div class="ph-sub" id="periodPhaseSub"></div>
+      </div>
+      <div class="mine-card">
+        <div class="set-row">
+          <label>周期长度（天）<input type="number" id="pCycle" min="21" max="45"></label>
+          <label>经期长度（天）<input type="number" id="pDur" min="2" max="15"></label>
+        </div>
+      </div>
+      <div class="mine-card">
+        <div class="stat-head"><button id="prevPMonth">‹</button><span id="periodMonth">2026-08</span><button id="nextPMonth">›</button></div>
+        <div class="pc-grid" id="periodGrid"></div>
+        <div class="pc-legend">
+          <span><i class="lg period"></i>经期</span>
+          <span><i class="lg predict"></i>预测经期</span>
+          <span><i class="lg ovulation"></i>排卵日</span>
+          <span><i class="lg fertile-text"></i>易孕期</span>
+          <span><i class="lg today"></i>今天</span>
+        </div>
+
+        <!-- 当日记录面板（美柚式） -->
+        <div class="period-panel" id="periodPanel">
+          <div class="pp-date"><span id="pDayTitle">2026-08-08</span><span class="tag" id="pDayTag">今天</span></div>
+          <div class="period-toggle">
+            <button id="pDayPeriodYes" class="on">🩸 月经来了</button>
+            <button id="pDayPeriodNo">未至</button>
+          </div>
+          <div id="periodOnlyGroup">
+            <div class="pp-row">
+              <div class="pp-label"><i>🩸</i>流量</div>
+              <select id="pFlow">
+                <option value="">不记</option>
+                <option value="spotting">点滴出血</option>
+                <option value="light">量少</option>
+                <option value="normal">正常</option>
+                <option value="heavy">量多</option>
+              </select>
+            </div>
+            <div class="pp-row">
+              <div class="pp-label"><i>🎨</i>颜色</div>
+              <select id="pColor">
+                <option value="">不记</option>
+                <option value="bright">鲜红</option>
+                <option value="dark">暗红</option>
+                <option value="brown">褐色</option>
+                <option value="pink">淡红</option>
+              </select>
+            </div>
+          </div>
+          <div class="pp-row">
+            <div class="pp-label"><i>😣</i>痛经</div>
+            <select id="pPain">
+              <option value="0">无</option>
+              <option value="1">轻微</option>
+              <option value="2">中度</option>
+              <option value="3">严重</option>
+            </select>
+          </div>
+          <div class="pp-row">
+            <div class="pp-label"><i>😊</i>心情</div>
+            <select id="pMood">
+              <option value="">不记</option>
+              <option value="😊">😊 不错</option>
+              <option value="😐">😐 一般</option>
+              <option value="😟">😟 低落</option>
+              <option value="😡">😡 烦躁</option>
+              <option value="😴">😴 疲惫</option>
+              <option value="🤒">🤒 不适</option>
+            </select>
+          </div>
+          <div class="pp-row">
+            <div class="pp-label"><i>🕐</i>具体时间</div>
+            <input type="time" id="pTime">
+          </div>
+          <div class="pp-row">
+            <div class="pp-label"><i>📝</i>备注</div>
+            <input type="text" id="pNote" placeholder="如：腰酸、喝了红糖水">
+          </div>
+          <div class="pp-actions">
+            <button class="save" id="pSaveDay">保存</button>
+            <button class="clear" id="pClearDay">清空</button>
+          </div>
+        </div>
+      </div>
+      <div class="mine-card hint-card">点日历选择日期，在下方记录当天状态。数据本地保存，导出备份时一并带走。</div>
     </div>
 
     <!-- 底部 Tab -->
